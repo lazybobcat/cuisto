@@ -1,0 +1,69 @@
+{
+    "name": "cuisto",
+    "$schema": "node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "src",
+    "projectType": "library",
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "defaultConfiguration": "production",
+            "options": {
+                "main": ".",
+                "outputPath": "dist/cuisto",
+                "outputFileName": "cli.js",
+                "tsConfig": "tsconfig.lib.json",
+                "assets": [
+                    {
+                        "glob": "./README.md",
+                        "input": ".",
+                        "output": "."
+                    }
+                ],
+                "platform": "node"
+            },
+            "configurations": {
+                "development": {
+                    "minify": false
+                },
+                "production": {
+                    "minify": true
+                }
+            }
+        },
+        "install": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd dist/cuisto && HUSKY=0 npm install -g --install-links"
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "options": {
+                "lintFilePatterns": [
+                    "./src",
+                    "./cli.ts",
+                    "{projectRoot}/package.json"
+                ]
+            }
+        },
+        "test": {
+            "executor": "@nx/vite:test",
+            "outputs": [
+                "{options.reportsDirectory}"
+            ],
+            "options": {
+                "reportsDirectory": "coverage/cuisto"
+            }
+        }
+    },
+    "tags": []
+}

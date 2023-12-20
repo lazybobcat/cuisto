@@ -1,0 +1,12 @@
+# Add files here to ignore them from prettier formatting
+/dist
+/coverage
+/.nx/cache
+/node_modules
+cli.ts
+*.ts
+*.js
+*.html
+*.md
+package.json
+package-lock.json

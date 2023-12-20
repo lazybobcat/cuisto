@@ -1,0 +1,49 @@
+{
+    "name": "@lazybobcat/cuisto",
+    "version": "0.0.1",
+    "license": "MIT",
+    "scripts": {
+        "build": "nx build",
+        "test": "nx reset && nx test",
+        "test-watch": "nx test --watch",
+        "prepare": "husky install"
+    },
+    "dependencies": {
+        "commander": "^11.1.0",
+        "ora": "^7.0.1",
+        "tslib": "^2.3.0"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^18.4.3",
+        "@commitlint/config-conventional": "^18.4.3",
+        "@nx/esbuild": "^17.2.6",
+        "@nx/eslint": "17.2.6",
+        "@nx/eslint-plugin": "17.2.6",
+        "@nx/js": "17.2.6",
+        "@nx/vite": "17.2.6",
+        "@nx/workspace": "17.2.6",
+        "@swc-node/register": "~1.6.7",
+        "@swc/core": "~1.3.85",
+        "@types/node": "18.7.1",
+        "@types/ora": "^3.2.0",
+        "@typescript-eslint/eslint-plugin": "^6.9.1",
+        "@typescript-eslint/parser": "^6.9.1",
+        "@vitest/coverage-v8": "~0.34.6",
+        "@vitest/ui": "~0.34.6",
+        "esbuild": "^0.19.10",
+        "eslint": "~8.48.0",
+        "eslint-config-prettier": "^9.0.0",
+        "husky": "^8.0.0",
+        "nx": "17.2.6",
+        "prettier": "^2.6.2",
+        "typescript": "~5.3.0",
+        "vite": "^5.0.0",
+        "vitest": "~0.34.6"
+    },
+    "type": "module",
+    "main": "./cli.js",
+    "typings": "./cli.d.ts",
+    "bin": {
+        "cuisto": "./cli.js"
+    }
+}
