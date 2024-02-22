@@ -1,0 +1,43 @@
+{
+    "name": "cuisto-api",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/cuisto-api/src",
+    "projectType": "library",
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/packages/cuisto-api",
+                "main": "packages/cuisto-api/src/index.ts",
+                "tsConfig": "packages/cuisto-api/tsconfig.lib.json",
+                "assets": [
+                    "packages/cuisto-api/*.md"
+                ],
+                "generatePackageJson": true,
+                "format": [
+                    "esm"
+                ],
+                "platform": "node"
+            }
+        },
+        "publish": {
+            "command": "node tools/scripts/publish.mjs cuisto-api {args.ver} {args.tag}",
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "test": {
+            "executor": "@nx/vite:test",
+            "outputs": [
+                "{options.reportsDirectory}"
+            ],
+            "options": {
+                "reportsDirectory": "../../coverage/packages/cuisto-api"
+            }
+        }
+    },
+    "tags": []
+}

@@ -1,0 +1,37 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "rootDir": ".",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "target": "es2022",
+        "allowJs": true,
+        "resolveJsonModule": true,
+        "moduleDetection": "force",
+        "isolatedModules": true,
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "moduleResolution": "Bundler",
+        "module": "ESNext",
+        "noEmit": true,
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "skipDefaultLibCheck": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "lib": ["es2020"],
+        "baseUrl": ".",
+        "paths": {
+            "@lazybobcat/cuisto-api": ["packages/cuisto-api/src/index.ts"],
+            "@lazybobcat/cuisto-cli": ["packages/cuisto-cli/src/index.ts"]
+        }
+    },
+    "exclude": ["node_modules", "tmp"]
+}

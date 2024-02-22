@@ -1,0 +1,141 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "!**/*"
+  ],
+  "plugins": [
+    "@nx"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "extends": [
+        "plugin:@nx/typescript"
+      ],
+      "rules": {
+        "arrow-parens": [
+          "warn",
+          "as-needed"
+        ],
+        "block-scoped-var": "warn",
+        "block-spacing": [
+          "error",
+          "always"
+        ],
+        "brace-style": [
+          "error",
+          "1tbs",
+          {
+            "allowSingleLine": true
+          }
+        ],
+        "curly": [
+          "error",
+          "all"
+        ],
+        "eqeqeq": "warn",
+        "indent": [
+          "warn",
+          4,
+          {
+            "SwitchCase": 1,
+            "ignoredNodes": [
+              "PropertyDefinition"
+            ]
+          }
+        ],
+        "linebreak-style": [
+          "error",
+          "unix"
+        ],
+        "no-else-return": "error",
+        "no-empty": "warn",
+        "no-empty-function": "warn",
+        "no-undef": [
+          "off"
+        ],
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "vars": "local",
+            "args": "none"
+          }
+        ],
+        "object-curly-spacing": [
+          "error",
+          "never"
+        ],
+        "padding-line-between-statements": [
+          "warn",
+          {
+            "blankLine": "always",
+            "prev": "*",
+            "next": "return"
+          }
+        ],
+        "prefer-arrow-callback": "warn",
+        "quotes": [
+          "warn",
+          "single",
+          {
+            "avoidEscape": true
+          }
+        ],
+        "semi": [
+          "error",
+          "always"
+        ],
+        "sort-imports": [
+          "error",
+          {
+            "allowSeparatedGroups": true
+          }
+        ],
+        "space-before-blocks": [
+          "error",
+          "always"
+        ],
+        "yoda": [
+          "error",
+          "always",
+          {
+            "onlyEquality": true
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "*.js",
+        "*.jsx"
+      ],
+      "extends": [
+        "plugin:@nx/javascript"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "*.json"
+      ],
+      "parser": "jsonc-eslint-parser",
+      "rules": {
+        "@nx/dependency-checks": [
+          "error",
+          {
+            "ignoredDependencies": [
+              "tslib"
+            ],
+            "ignoredFiles": [
+              "{projectRoot}/vite.config.{js,ts,mjs,mts}"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

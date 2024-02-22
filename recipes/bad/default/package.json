@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "name": "bad-recipe",
+  "devDependencies": {
+    "@inquirer/prompts": "^4.1.0"
+  }
+}

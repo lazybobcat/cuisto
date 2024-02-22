@@ -1,0 +1,9 @@
+{
+  "main": "index.js",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the package"
+    }
+  }
+}
