@@ -2,13 +2,9 @@
 
 import {Command} from 'commander';
 
-import {IFS, ufs} from 'unionfs';
-import {VirtualFS, applyChanges, error, verbose} from '@lazybobcat/cuisto-api';
-import chalk from 'chalk';
+import {VirtualFS, applyChanges, error, spinner, verbose} from '@lazybobcat/cuisto-api';
 import {confirm} from '@inquirer/prompts';
 import fs from 'node:fs';
-import ora from 'ora';
-import {vol} from 'memfs';
 
 function increaseVerbosity(_: string, previous: number): number {
     return previous + 1;
@@ -96,7 +92,7 @@ program.command('test')
         if (!options.dryRun) {
             const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
             if (answer) {
-                applyChanges(vfs, options.verbose);
+                await applyChanges(vfs, options.verbose);
             }
         }
     });
@@ -106,9 +102,9 @@ program.parse(process.argv);
 
 const options = program.opts<Options>();
 if (options['test']) {
-    const spinner = ora('Loading unicorns...').start();
+    const progress = spinner('Loading unicorns...').start();
     setTimeout(() => {
-        spinner.succeed();
+        progress.succeed();
         console.log(hello(options['test']));
     }, 1000);
 }

@@ -1,10 +1,9 @@
 import {MakeDirectoryOptions, Mode, WriteFileOptions, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync} from 'node:fs';
 import {dirname, join, relative, sep} from 'path';
-import ora from 'ora';
 
 import {changesToTree, printTree} from './print-tree';
+import {spinner, verbose} from './output';
 import {Changes} from './file-change';
-import {verbose} from './output';
 
 // const {} = fs;
 
@@ -253,9 +252,10 @@ const outputFileSync = (path: string, content: Buffer | string, options: {mode?:
 /**
  * @internal
  */
-export const applyChanges = (vfs: VirtualFS, verboseLevel = 1): void => {
+export const applyChanges = async (vfs: VirtualFS, verboseLevel = 1): Promise<void> => {
     for (const [path, change] of Object.entries(vfs.changes())) {
-        const progress = ora(`Applying changes to ${path}...`).start();
+        const progress = spinner(`Applying changes to ${path}...`).start();
+
         try {
             const fullPath = join(vfs.root, path);
 
