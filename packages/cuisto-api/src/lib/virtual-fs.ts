@@ -5,8 +5,6 @@ import {changesToTree, printTree} from './print-tree';
 import {spinner, verbose} from './output';
 import {Changes} from './file-change';
 
-// const {} = fs;
-
 /**
  * A virtual file system that can be used to simulate file system operations.
  * It uses a real file system as a base and keeps track of the changes made to it.
@@ -112,8 +110,9 @@ export class VirtualFS {
         }
 
         // Remove empty directories
-        if ('' !== path && 0 === this.children(dirname(path)).length) {
-            this.delete(dirname(path));
+        const parentPath = dirname(path);
+        if ('' !== path && '.' !== parentPath && 0 === this.children(parentPath).length) {
+            this.delete(parentPath);
         }
     };
 
@@ -208,7 +207,7 @@ export class VirtualFS {
 
     /**
      * Get the changes made to the virtual file system.
-     * 
+     *
      * @returns A snapshot of the changes made to the virtual file system.
      */
     changes = (): Changes => {

@@ -104,6 +104,12 @@ describe('VirtualFS', () => {
         vfs.write('dist/hello.txt', 'I will be deleted');
         vfs.delete('////dist//hello.txt////');
         expect(vfs.changes()['dist/hello.txt']?.operation).toEqual('DELETE');
+
+        // Check that we cannot delete the project root '.'
+        vfs.delete('foo');
+        vfs.delete('baz');
+        vfs.delete('dist');
+        expect(Object.keys(vfs.changes())).toEqual(['foo', 'dist/hello.txt', 'dist', 'baz']);
     });
 
     test('delete() should remove empty directories', () => {

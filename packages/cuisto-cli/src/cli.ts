@@ -26,11 +26,6 @@ program
     .option('-t, --test <value>', 'Say hello')
     .option('-i, --init', 'Initialize a new cuisto project')
     .option('-m, --module <recipe>', 'Dynamically import and execute a recipe');
-type Options = {
-    verbose: number;
-    test: string;
-    init: boolean;
-}
 
 program.command('install <recipe> [version]')
     .alias('i')
@@ -100,6 +95,11 @@ program.command('test')
 
 program.parse(process.argv);
 
+type Options = {
+    verbose: number;
+    test: string;
+    init: boolean;
+}
 const options = program.opts<Options>();
 if (options['test']) {
     const progress = spinner('Loading unicorns...').start();
