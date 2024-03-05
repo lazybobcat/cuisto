@@ -16,7 +16,6 @@
                 "assets": [
                     "packages/cuisto-api/*.md"
                 ],
-                "generatePackageJson": true,
                 "format": [
                     "esm"
                 ],
@@ -28,6 +27,18 @@
             "dependsOn": [
                 "build"
             ]
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "options": {
+                "lintFilePatterns": [
+                    "packages/cuisto-api/src/**/*.ts",
+                    "packages/cuisto-api/package.json"
+                ]
+            }
         },
         "test": {
             "executor": "@nx/vite:test",

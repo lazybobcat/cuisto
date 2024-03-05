@@ -22,6 +22,14 @@
             "inputs": ["default", "^default"]
         }
     },
+    "generators": {
+        "@nx/js:library": {
+            "bundler": "esbuild",
+            "publishable": true,
+            "linter": "eslint",
+            "unitTestRunner": "vitest"
+        }
+    },
     "plugins": [
         {
             "plugin": "@nx/eslint/plugin",

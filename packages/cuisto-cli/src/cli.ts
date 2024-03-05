@@ -2,9 +2,11 @@
 
 import {Command} from 'commander';
 
-import {VirtualFS, applyChanges, error, spinner, verbose} from '@lazybobcat/cuisto-api';
+import {VirtualFS, error, spinner, verbose} from '@lazybobcat/cuisto-api';
 import {confirm} from '@inquirer/prompts';
 import fs from 'node:fs';
+
+import {applyChanges, doesRecipeContainDangerousCode} from './lib/cuisto-cli';
 
 function increaseVerbosity(_: string, previous: number): number {
     return previous + 1;
@@ -30,14 +32,16 @@ program
 program.command('install <recipe> [version]')
     .alias('i')
     .description('Install the given recipe')
+    .option('-y, --yes', 'Non interactive mode', false)
     .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
     .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
-    .action(async (recipe: string, version: string, options: {verbose: number, dryRun: boolean}) => {
+    .action(async (recipe: string, version: string, options: {yes: boolean, verbose: number, dryRun: boolean}) => {
         console.log(`🍱 Cooking ${recipe}...`);
 
         // Version
         version = version || 'default';
         const path = `${recipesPath}/${recipe}/${version}`;
+        verbose(`Check recipe at path ${path}`, options);
 
         let schema: {main: string} | undefined = undefined;
 
@@ -57,10 +61,37 @@ program.command('install <recipe> [version]')
             process.exit(1);
         }
 
+        if (doesRecipeContainDangerousCode(path, options)) {
+            console.log(error('The recipe contains dangerous code.'));
+            // the user should be warned and asked if they want to continue
+            const answer = await confirm({message: 'Do you want to continue anyway?', default: false});
+            if (!answer) {
+                process.exit(1);
+            }
+        }
+
         // Execute the main file
         try {
+            const vfs = new VirtualFS(dirpath, options.verbose);
             const r = await import(`${path}/${schema.main}`);
-            await r.default();
+
+            // define environment variables that can be used in the recipe
+            process.env['DRY_RUN'] = options.dryRun ? 'true' : 'false';
+            process.env['VERBOSE'] = String(options.verbose);
+
+            // Execute the recipe
+            await r.default({
+                vfs,
+            });
+
+            // If there are changes to the vfs, merge them
+            if (!options.dryRun && vfs.hasChanges()) {
+                console.log(vfs.tree());
+                const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
+                if (answer) {
+                    await applyChanges(vfs, options.verbose);
+                }
+            }
         } catch (e) {
             verbose(e instanceof Error ? e.message : String(e), options);
             console.log(error(`The recipe could not be executed. Check that ${recipe}/${schema.main} exists and exports a default function.`));

@@ -1,9 +1,9 @@
-import {MakeDirectoryOptions, Mode, WriteFileOptions, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync} from 'node:fs';
+import {MakeDirectoryOptions, Mode, WriteFileOptions, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync} from 'node:fs';
 import {dirname, join, relative, sep} from 'path';
 
 import {changesToTree, printTree} from './print-tree';
-import {spinner, verbose} from './output';
 import {Changes} from './file-change';
+import {verbose} from './output';
 
 /**
  * A virtual file system that can be used to simulate file system operations.
@@ -215,6 +215,22 @@ export class VirtualFS {
     };
 
     /**
+     * Check if there are changes to the virtual file system.
+     *
+     * @returns True if there are changes, false otherwise.
+     */
+    hasChanges = (): boolean => Object.keys(this.#changes).length > 0;
+
+    /**
+     * Mark a change as applied.
+     *
+     * @param path The path of the change to mark as applied.
+     */
+    changeApplied = (path: string): void => {
+        delete this.#changes[path];
+    };
+
+    /**
      * @returns A string representation of the virtual file system.
      */
     tree = (): string => printTree(changesToTree(this.#changes), this.root);
@@ -237,7 +253,7 @@ export class VirtualFS {
     };
 }
 
-const outputFileSync = (path: string, content: Buffer | string, options: {mode?: Mode} = {}): void => {
+export const outputFileSync = (path: string, content: Buffer | string, options: {mode?: Mode} = {}): void => {
     const mkdirOptions: MakeDirectoryOptions = {recursive: true};
     const writeOptions: WriteFileOptions = {};
     if (options.mode) {
@@ -246,38 +262,5 @@ const outputFileSync = (path: string, content: Buffer | string, options: {mode?:
     }
     mkdirSync(dirname(path), mkdirOptions);
     writeFileSync(path, content, writeOptions);
-};
-
-/**
- * @internal
- */
-export const applyChanges = async (vfs: VirtualFS, verboseLevel = 1): Promise<void> => {
-    for (const [path, change] of Object.entries(vfs.changes())) {
-        const progress = spinner(`Applying changes to ${path}...`).start();
-
-        try {
-            const fullPath = join(vfs.root, path);
-
-            if ('CREATE' === change.operation) {
-                progress.text = `Creating ${path}...`;
-                outputFileSync(fullPath, change.content || '', {mode: change.mode});
-            }
-
-            if ('UPDATE' === change.operation) {
-                progress.text = `Updating ${path}...`;
-                outputFileSync(fullPath, change.content || '', {mode: change.mode});
-            }
-
-            if ('DELETE' === change.operation) {
-                progress.text = `Deleting ${path}...`;
-                rmSync(fullPath, {recursive: true, force: true});
-            }
-
-            progress.succeed(`${progress.text} Done!`);
-        } catch (e) {
-            verbose(e instanceof Error ? e.message : String(e), {verbose: verboseLevel});
-            progress.fail(`An error occurred while applying the changes to ${path}`);
-        }
-    }
 };
 

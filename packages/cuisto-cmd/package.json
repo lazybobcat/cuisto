@@ -1,0 +1,11 @@
+{
+    "name": "@lazybobcat/cuisto-cmd",
+    "version": "0.0.1",
+    "dependencies": {
+    "execa": "^8.0.1",
+    "@lazybobcat/cuisto-api": "0.0.1",
+    "@inquirer/prompts": "^4.1.0"
+  },
+    "type": "module",
+    "main": "./index.js"
+}

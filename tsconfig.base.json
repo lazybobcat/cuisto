@@ -30,7 +30,8 @@
         "baseUrl": ".",
         "paths": {
             "@lazybobcat/cuisto-api": ["packages/cuisto-api/src/index.ts"],
-            "@lazybobcat/cuisto-cli": ["packages/cuisto-cli/src/index.ts"]
+            "@lazybobcat/cuisto-cli": ["packages/cuisto-cli/src/index.ts"],
+            "@lazybobcat/cuisto-cmd": ["packages/cuisto-cmd/src/index.ts"]
         }
     },
     "exclude": ["node_modules", "tmp"]
