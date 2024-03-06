@@ -2,7 +2,7 @@
 
 import {Command} from 'commander';
 
-import {VirtualFS, addToEnvFile, error, parseEnvFile, spinner, verbose} from '@lazybobcat/cuisto-api';
+import {VirtualFS, Yaml, printError, printInfo, printSuccess, verbose} from '@lazybobcat/cuisto-api';
 import {confirm} from '@inquirer/prompts';
 import fs from 'node:fs';
 
@@ -15,7 +15,6 @@ function increaseVerbosity(_: string, previous: number): number {
 const metadata = await import('../package.json', {with: {type: 'json'}});
 
 /*****************/
-const hello = (name: string) => `Hello ${name}!`;
 const dirpath = fs.realpathSync('.');
 const recipesPath = '/media/dev/www/cuisto/recipes';
 
@@ -25,9 +24,7 @@ const program = new Command();
 program
     .version(metadata.default.version, '--version')
     .description('Install and update your project based on recipes, cuisto will bake them for you!')
-    .option('-t, --test <value>', 'Say hello')
-    .option('-i, --init', 'Initialize a new cuisto project')
-    .option('-m, --module <recipe>', 'Dynamically import and execute a recipe');
+    .option('-i, --init', 'Initialize a new cuisto project'); // TODO: implement the init command
 
 program.command('install <recipe> [version]')
     .alias('i')
@@ -48,7 +45,7 @@ program.command('install <recipe> [version]')
         version: string,
         options: { property: { [name: string]: string }, yes: boolean, verbose: number, dryRun: boolean }
     ) => {
-        console.log(`🍱 Cooking ${recipe}...`);
+        printInfo(`🍳 Cooking ${recipe}...`, false);
 
         // Version
         version = version || 'default';
@@ -63,13 +60,13 @@ program.command('install <recipe> [version]')
             schema = JSON.parse(data);
         } catch (e) {
             verbose(e instanceof Error ? e.message : String(e), options);
-            console.log(error(`The recipe ${recipe} does not exist.`));
+            printError(`The recipe ${recipe} does not exist.`);
             process.exit(1);
         }
 
         if (!schema?.main) {
             verbose(JSON.stringify(schema), options);
-            console.log(error('No main file found in the recipe schema.'));
+            printError('No main file found in the recipe schema.');
             process.exit(1);
         }
 
@@ -77,12 +74,12 @@ program.command('install <recipe> [version]')
             fs.readFileSync(`${path}/${schema.main}`, 'utf8');
         } catch (e) {
             verbose(e instanceof Error ? e.message : String(e), options);
-            console.log(error(`The main file ${schema.main} does not exist in the recipe.`));
+            printError(`The main file ${schema.main} does not exist in the recipe.`);
             process.exit(1);
         }
 
         if (doesRecipeContainDangerousCode(path, options)) {
-            console.log(error('The recipe contains dangerous code.'));
+            printError('The recipe contains dangerous code.');
             // the user should be warned and asked if they want to continue
             const answer = await confirm({message: 'Do you want to continue anyway?', default: false});
             if (!answer) {
@@ -117,9 +114,11 @@ program.command('install <recipe> [version]')
                     await applyChanges(vfs, options.verbose);
                 }
             }
+
+            printSuccess(`The recipe ${recipe} has been successfully executed!`);
         } catch (e) {
             verbose(e instanceof Error ? e.message : String(e), options);
-            console.log(error(`An error occurred while executing the recipe ${recipe}. Please run the command with the --verbose option to get more information.`));
+            printError(`An error occurred while executing the recipe ${recipe}. Please run the command with the --verbose option to get more information.`);
             process.exit(1);
         }
     });
@@ -130,51 +129,17 @@ program.command('test')
     .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
     .action(async (options: { verbose: number, yes: boolean, dryRun: boolean }) => {
         const vfs = new VirtualFS(dirpath, options.verbose);
+        const doc = Yaml.parse<any>(vfs.read('docker-compose.yaml', 'utf-8') || '');
+        doc.volumes = {
+            name: 'test'
+        };
+        console.log(doc);
 
-        const envVariables = parseEnvFile(vfs);
-        console.log(envVariables);
-        console.log(Object.keys(envVariables).length);
-
-        addToEnvFile(vfs, {
-            'WS_PORT': '6969',
-            'test': 'toto\ntiti',
-        });
-
+        vfs.write('docker-compose.out.yaml', Yaml.stringify(doc));
         console.log(vfs.tree());
-        console.log(vfs.read('.env', 'utf-8'));
-        // vfs.write('.env.out', stringify(envVariables));
-        // applyChanges(vfs, options.verbose);
-
-        // vfs.write('dist/hello.txt', 'Hello World!');
-        // vfs.write('toto.txt', 'tata');
-        //
-        // vfs.rename('dist/hello.txt', 'dist2/hello.txt');
-        // // console.log(vfs.tree());
-        //
-        // vfs.delete('toto.txt');
-        // console.log(vfs.tree());
-        //
-        // if (!options.dryRun) {
-        //     const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
-        //     if (answer) {
-        //         await applyChanges(vfs, options.verbose);
-        //     }
-        // }
+        applyChanges(vfs, options.verbose);
     });
 
 
 program.parse(process.argv);
 
-type Options = {
-    verbose: number;
-    test: string;
-    init: boolean;
-}
-const options = program.opts<Options>();
-if (options['test']) {
-    const progress = spinner('Loading unicorns...').start();
-    setTimeout(() => {
-        progress.succeed();
-        console.log(hello(options['test']));
-    }, 1000);
-}

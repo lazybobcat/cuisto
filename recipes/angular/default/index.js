@@ -1,4 +1,4 @@
-import { DotEnv } from '@lazybobcat/cuisto-api';
+import { DockerCompose, DotEnv } from '@lazybobcat/cuisto-api';
 
 export default async function({ vfs, properties }) {
     // console.log(properties);
@@ -6,21 +6,19 @@ export default async function({ vfs, properties }) {
     const dotenv = new DotEnv(vfs);
     dotenv.addEnvironmentVariables({
         NG_LISTEN_PORT: properties['ngListenPort'],
-        SIMPLE: 'angular avec une "',
-        COMPLEX: "L'application doit fonctionner",
-        MULTILINE: "ligne 1\nLigne2\nLigne 3 avec une \" et enfin\n l'application doit fonctionner",
     });
 
-    // DockerCompose.addService({
-    //     'angular': {
-    //         image: 'node:20',
-    //         command: 'npm run start',
-    //         environment: {
-    //             NG_LISTEN_PORT: properties['ngListenPort'],
-    //         },
-    //         ports: [`${properties['ngListenPort']}:4200`],
-    //         volumes: ['./:/app'],
-    //         working_dir: '/app',
-    //     }
-    // });
+    const compose = new DockerCompose(vfs);
+    compose.addService({
+        'node': {
+            image: 'node:20-alpine',
+            command: 'npm run start',
+            environment: {
+                NG_LISTEN_PORT: '${NG_LISTEN_PORT}',
+            },
+            ports: ['${NG_LISTEN_PORT}:4200'],
+            volumes: ['../:/app'], // This is a relative path, it will be resolved to the '.compose' directory
+            working_dir: '/app',
+        }
+    });
 };

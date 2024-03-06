@@ -4,7 +4,8 @@
     "dependencies": {
         "chalk": "^5.3.0",
         "ora": "^8.0.1",
-        "memfs": "^4.7.7"
+        "memfs": "^4.7.7",
+        "js-yaml": "^4.1.0"
     },
     "type": "module",
     "main": "./index.js"

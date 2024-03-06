@@ -1,0 +1,54 @@
+{
+    "name": "angular",
+    "main": "index.js",
+    "properties": {
+        "project": {
+            "type": "string",
+            "description": "What is the project name?",
+            "required": true
+        },
+        "ngListenPort": {
+            "type": "number",
+            "description": "What port should the Angular server listen on?",
+            "default": 4200
+        },
+        "bestDev": {
+            "type": "choice",
+            "description": "Who is the best developper?",
+            "choices": [
+                { "value": "Corentin" },
+                { "value": "Marion" },
+                { "value": "Axel" },
+                { "value": "Claude" },
+                { "value": "Guillaume" }
+            ]
+        },
+        "uber": {
+            "type": "choice",
+            "multiple": true,
+            "description": "Qu'est ce qu'on mange à midi?",
+            "choices": [
+                {
+                    "name": "BK",
+                    "value": "Burger"
+                },
+                {
+                    "name": "McDo",
+                    "value": "Burger"
+                },
+                {
+                    "value": "Sushi"
+                },
+                {
+                    "value": "Pizza"
+                },
+                {
+                    "value": "Paul"
+                },
+                {
+                    "value": "Kebab"
+                }
+            ]
+        }
+    }
+}

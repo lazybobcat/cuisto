@@ -1,4 +1,4 @@
-import {doParse, doStringify} from './dotenv';
+import {doParse, doStringify} from './dotenv_functions';
 
 describe('DotEnv.readEnvironmentVariables', () => {
     test('should parse a simple env file', () => {
