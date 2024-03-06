@@ -2,11 +2,11 @@
 
 import {Command} from 'commander';
 
-import {VirtualFS, error, spinner, verbose} from '@lazybobcat/cuisto-api';
+import {VirtualFS, addToEnvFile, error, parseEnvFile, spinner, verbose} from '@lazybobcat/cuisto-api';
 import {confirm} from '@inquirer/prompts';
 import fs from 'node:fs';
 
-import {applyChanges, doesRecipeContainDangerousCode} from './lib/cuisto-cli';
+import {Properties, applyChanges, askProperties, doesRecipeContainDangerousCode} from './lib/cuisto-cli';
 
 function increaseVerbosity(_: string, previous: number): number {
     return previous + 1;
@@ -32,10 +32,22 @@ program
 program.command('install <recipe> [version]')
     .alias('i')
     .description('Install the given recipe')
+    .option('-p, --property <name>=<value>', 'Set a property for the recipe', (v, acc: { [name: string]: string | undefined }) => {
+        const [name, value] = v.split('=');
+        if (name) {
+            acc[name] = value;
+        }
+
+        return acc;
+    }, {})
     .option('-y, --yes', 'Non interactive mode', false)
     .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
     .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
-    .action(async (recipe: string, version: string, options: {yes: boolean, verbose: number, dryRun: boolean}) => {
+    .action(async (
+        recipe: string,
+        version: string,
+        options: { property: { [name: string]: string }, yes: boolean, verbose: number, dryRun: boolean }
+    ) => {
         console.log(`🍱 Cooking ${recipe}...`);
 
         // Version
@@ -43,7 +55,7 @@ program.command('install <recipe> [version]')
         const path = `${recipesPath}/${recipe}/${version}`;
         verbose(`Check recipe at path ${path}`, options);
 
-        let schema: {main: string} | undefined = undefined;
+        let schema: { main: string, properties: Properties } | undefined = undefined;
 
         // Load the "schema.json" file from the given recipe
         try {
@@ -78,10 +90,15 @@ program.command('install <recipe> [version]')
             // define environment variables that can be used in the recipe
             process.env['DRY_RUN'] = options.dryRun ? 'true' : 'false';
             process.env['VERBOSE'] = String(options.verbose);
+            process.env['RECIPE_NAME'] = recipe;
+
+            // Extract properties from the schema and ask the user to fill it interactively
+            const properties = await askProperties(schema.properties, options.property, options);
 
             // Execute the recipe
             await r.default({
                 vfs,
+                properties,
             });
 
             // If there are changes to the vfs, merge them
@@ -103,24 +120,38 @@ program.command('test')
     .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
     .option('-y, --yes', 'Non interactive mode', false)
     .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
-    .action(async (options: {verbose: number, yes: boolean, dryRun: boolean}) => {
+    .action(async (options: { verbose: number, yes: boolean, dryRun: boolean }) => {
         const vfs = new VirtualFS(dirpath, options.verbose);
 
-        vfs.write('dist/hello.txt', 'Hello World!');
-        vfs.write('toto.txt', 'tata');
+        const envVariables = parseEnvFile(vfs);
+        console.log(envVariables);
+        console.log(Object.keys(envVariables).length);
 
-        vfs.rename('dist/hello.txt', 'dist2/hello.txt');
-        // console.log(vfs.tree());
+        addToEnvFile(vfs, {
+            'WS_PORT': '6969',
+            'test': 'toto\ntiti',
+        });
 
-        vfs.delete('toto.txt');
         console.log(vfs.tree());
+        console.log(vfs.read('.env', 'utf-8'));
+        // vfs.write('.env.out', stringify(envVariables));
+        // applyChanges(vfs, options.verbose);
 
-        if (!options.dryRun) {
-            const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
-            if (answer) {
-                await applyChanges(vfs, options.verbose);
-            }
-        }
+        // vfs.write('dist/hello.txt', 'Hello World!');
+        // vfs.write('toto.txt', 'tata');
+        //
+        // vfs.rename('dist/hello.txt', 'dist2/hello.txt');
+        // // console.log(vfs.tree());
+        //
+        // vfs.delete('toto.txt');
+        // console.log(vfs.tree());
+        //
+        // if (!options.dryRun) {
+        //     const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
+        //     if (answer) {
+        //         await applyChanges(vfs, options.verbose);
+        //     }
+        // }
     });
 
 
