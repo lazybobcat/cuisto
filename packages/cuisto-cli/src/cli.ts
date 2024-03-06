@@ -73,6 +73,14 @@ program.command('install <recipe> [version]')
             process.exit(1);
         }
 
+        try {
+            fs.readFileSync(`${path}/${schema.main}`, 'utf8');
+        } catch (e) {
+            verbose(e instanceof Error ? e.message : String(e), options);
+            console.log(error(`The main file ${schema.main} does not exist in the recipe.`));
+            process.exit(1);
+        }
+
         if (doesRecipeContainDangerousCode(path, options)) {
             console.log(error('The recipe contains dangerous code.'));
             // the user should be warned and asked if they want to continue
@@ -111,7 +119,7 @@ program.command('install <recipe> [version]')
             }
         } catch (e) {
             verbose(e instanceof Error ? e.message : String(e), options);
-            console.log(error(`The recipe could not be executed. Check that ${recipe}/${schema.main} exists and exports a default function.`));
+            console.log(error(`An error occurred while executing the recipe ${recipe}. Please run the command with the --verbose option to get more information.`));
             process.exit(1);
         }
     });
