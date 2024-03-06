@@ -1,4 +1,4 @@
-import { DockerCompose, DotEnv } from '@lazybobcat/cuisto-api';
+import { DockerCompose, DotEnv, Gitignore } from '@lazybobcat/cuisto-api';
 
 export default async function({ vfs, properties }) {
     // console.log(properties);
@@ -21,4 +21,11 @@ export default async function({ vfs, properties }) {
             working_dir: '/app',
         }
     });
+
+    const gi = new Gitignore(vfs);
+    gi.addPatterns([
+        '/node_modules',
+        '/dist',
+        '/.env',
+    ]);
 };
