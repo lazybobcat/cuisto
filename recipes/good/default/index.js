@@ -1,5 +1,5 @@
+import {Command} from '@lazybobcat/cuisto-api';
 import {confirm} from '@inquirer/prompts';
-import {exec} from '@lazybobcat/cuisto-cmd';
 
 export default async function({vfs}) {
     console.log('This is a good recipe!');
@@ -14,7 +14,7 @@ export default async function({vfs}) {
     // console.log(vfs.tree());
 
     try {
-        const result = await exec('ls -l');
+        const result = await Command.run('ls -l');
         console.log(result);
     } catch (error) {
         console.error(error);
