@@ -4,6 +4,7 @@ import {Command} from 'commander';
 
 import {VirtualFS, Yaml, printError, printInfo, printSuccess, verbose} from '@lazybobcat/cuisto-api';
 import {confirm} from '@inquirer/prompts';
+import {execa} from 'execa';
 import fs from 'node:fs';
 
 import {Properties, applyChanges, askProperties, doesRecipeContainDangerousCode} from './lib/cuisto-cli';
@@ -45,7 +46,7 @@ program.command('install <recipe> [version]')
         version: string,
         options: { property: { [name: string]: string }, yes: boolean, verbose: number, dryRun: boolean }
     ) => {
-        printInfo(`🍳 Cooking ${recipe}...`, false);
+        printInfo(`🍳 Cooking "${recipe}"...`);
 
         // Version
         version = version || 'default';
@@ -88,39 +89,34 @@ program.command('install <recipe> [version]')
         }
 
         // Execute the main file
-        try {
-            const vfs = new VirtualFS(dirpath, options.verbose);
-            const r = await import(`${path}/${schema.main}`);
+        const vfs = new VirtualFS(dirpath, options.verbose);
+        const r = await import(`${path}/${schema.main}`);
 
-            // define environment variables that can be used in the recipe
-            process.env['DRY_RUN'] = options.dryRun ? 'true' : 'false';
-            process.env['VERBOSE'] = String(options.verbose);
-            process.env['RECIPE_NAME'] = recipe;
+        // define environment variables that can be used in the recipe
+        process.env['DRY_RUN'] = options.dryRun ? 'true' : 'false';
+        process.env['VERBOSE'] = String(options.verbose);
+        process.env['RECIPE_NAME'] = recipe;
+        process.env['RECIPE_DEPENDENCIES'] = JSON.stringify(metadata.default.dependencies);
 
-            // Extract properties from the schema and ask the user to fill it interactively
-            const properties = await askProperties(schema.properties, options.property, options);
+        // Extract properties from the schema and ask the user to fill it interactively
+        const properties = await askProperties(schema.properties, options.property, options);
 
-            // Execute the recipe
-            await r.default({
-                vfs,
-                properties,
-            });
+        // Execute the recipe
+        await r.default({
+            vfs,
+            properties,
+        });
 
-            // If there are changes to the vfs, merge them
-            if (!options.dryRun && vfs.hasChanges()) {
-                console.log(vfs.tree());
-                const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
-                if (answer) {
-                    await applyChanges(vfs, options.verbose);
-                }
+        // If there are changes to the vfs, merge them
+        if (!options.dryRun && vfs.hasChanges()) {
+            console.log(vfs.tree());
+            const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
+            if (answer) {
+                await applyChanges(vfs, options.verbose);
             }
-
-            printSuccess(`The recipe ${recipe} has been successfully executed!`);
-        } catch (e) {
-            verbose(e instanceof Error ? e.message : String(e), options);
-            printError(`An error occurred while executing the recipe ${recipe}. Please run the command with the --verbose option to get more information.`);
-            process.exit(1);
         }
+
+        printSuccess(`The recipe ${recipe} has been successfully executed!`);
     });
 
 program.command('test')
@@ -142,4 +138,34 @@ program.command('test')
 
 
 program.parse(process.argv);
+
+/**
+ * This handler is called when an uncaught exception occurs. It will print a message to the user and provide information
+ * about the environment and the error that occurred.
+ */
+process.setUncaughtExceptionCaptureCallback(async error => {
+    const verbosity = Number(process.env['VERBOSE']) || 0;
+    const recipe = process.env['RECIPE_NAME'] || 'unknown';
+    const dependencies: {[dep: string]: string} = JSON.parse(process.env['RECIPE_DEPENDENCIES'] || '') || {};
+    const npm = await execa('npm', ['--version']);
+    if (verbosity > 0) {
+        verbose(error instanceof Error ? error.message : String(error), {verbose: verbosity});
+        printError(`An error occurred while executing the recipe "${recipe}".`);
+    } else {
+
+        printError(`An error occurred while executing the recipe "${recipe}". Please run the command with the --verbose option to get more information.`);
+    }
+
+    printInfo('If you consider opening an issue, please provide the following information:');
+    console.log(`
+Cuisto:\t${metadata.default.version}
+Node:\t${process.version}
+OS:\t${process.platform}
+npm:\t${npm.stdout}
+`);
+
+    for (const [name, version] of Object.entries(dependencies)) {
+        console.log(`${name}: ${version}`);
+    }
+});
 

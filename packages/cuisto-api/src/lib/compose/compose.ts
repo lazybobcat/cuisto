@@ -1,7 +1,7 @@
 import {join} from 'path';
 
-import {ComposeService, DockerComposeConfiguration} from './compose_types';
-import {doParse, doStringify} from './compose_functions';
+import {ComposeService, DockerComposeConfiguration} from './compose-types';
+import {doParse, doStringify} from './compose-functions';
 import {VirtualFS} from '../virtual-fs';
 
 export class DockerCompose {

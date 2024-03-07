@@ -1,4 +1,4 @@
-import {doParse, doStringify} from './gitignore_functions';
+import {doParse, doStringify} from './gitignore-functions';
 import {VirtualFS} from '../virtual-fs';
 
 /**

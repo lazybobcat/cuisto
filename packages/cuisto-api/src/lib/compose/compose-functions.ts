@@ -1,4 +1,4 @@
-import {DockerComposeConfiguration} from './compose_types';
+import {DockerComposeConfiguration} from './compose-types';
 import {Yaml} from '../yaml';
 
 export const doParse = (content: string): DockerComposeConfiguration => {

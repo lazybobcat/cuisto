@@ -1,4 +1,4 @@
-import {doParse, doStringify} from './dotenv_functions';
+import {doParse, doStringify} from './dotenv-functions';
 import {VirtualFS} from '../virtual-fs';
 
 export class DotEnv {

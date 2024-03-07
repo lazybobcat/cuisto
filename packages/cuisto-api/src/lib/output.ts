@@ -1,15 +1,15 @@
 import chalk from 'chalk';
 import ora from 'ora';
 
-export const info = (message: string, icon = true) => icon ? `🍡 ${chalk.cyan(message)}` : chalk.cyan(message);
-export const success = (message: string, icon = true) => icon ? `🍱 ${chalk.green(message)}` : chalk.green(message);
-export const error = (message: string, icon = true) => icon ? `🍄 ${chalk.bold.red(message)}` : chalk.bold.red(message);
-export const printInfo = (message: string, icon = true) => console.log(info(message, icon));
-export const printSuccess = (message: string, icon = true) => console.log(success(message, icon));
-export const printError = (message: string, icon = true) => console.log(error(message, icon));
+export const info = (message: string) => format(message, 'cyan');
+export const success = (message: string) => format(message, 'green');
+export const error = (message: string) => format(message, 'red');
+export const printInfo = (message: string) => console.log(info(message));
+export const printSuccess = (message: string) => console.log(success(message));
+export const printError = (message: string) => console.log(error(message));
 export const verbose = (message: string, options: {verbose: number}) => {
     if (options['verbose'] > 0) {
-        console.log(message);
+        console.error(message);
     }
 };
 
@@ -20,3 +20,5 @@ export const spinner = (text: string) => ora({
         frames: ['🍔', '🍕', '🍖', '🍗', '🍙', '🍜', '🍝', '🍣', '🍲', '🍳']
     }
 });
+
+const format = (message: string, color: 'cyan' | 'green' | 'red') => `${chalk[color](' ↪')} ${chalk.reset.inverse.bold[color](' CUISTO ')}  ${chalk[color](message)}`;

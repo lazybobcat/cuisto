@@ -1,4 +1,4 @@
-import {doParse, doStringify} from './compose_functions';
+import {doParse, doStringify} from './compose-functions';
 
 // generate test functions doParse and doStringify from compose.ts which must be used with a docker compose yaml configuration
 describe('DockerCompose.readConfiguration', () => {

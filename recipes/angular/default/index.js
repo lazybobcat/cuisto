@@ -1,7 +1,12 @@
-import { DockerCompose, DotEnv, Gitignore } from '@lazybobcat/cuisto-api';
+import {DockerCompose, DotEnv, Gitignore, Helper} from '@lazybobcat/cuisto-api';
 
 export default async function({ vfs, properties }) {
     // console.log(properties);
+    // console.log(vfs.root);
+
+    if(isNaN(Number(properties['ngListenPort']))) {
+        return Helper.errorAndExit('Invalid port number');
+    }
 
     const dotenv = new DotEnv(vfs);
     dotenv.addEnvironmentVariables({

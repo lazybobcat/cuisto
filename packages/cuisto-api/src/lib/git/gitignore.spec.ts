@@ -1,4 +1,4 @@
-import {doParse, doStringify} from './gitignore_functions';
+import {doParse, doStringify} from './gitignore-functions';
 
 describe('.gitignore doParse', () => {
     it('should parse a .gitignore file', () => {
