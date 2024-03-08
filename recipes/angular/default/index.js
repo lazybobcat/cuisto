@@ -14,7 +14,7 @@ export default async function({ vfs, properties }) {
     });
 
     const compose = new DockerCompose(vfs);
-    compose.addService({
+    compose.addServices({
         'node': {
             image: 'node:20-alpine',
             command: 'npm run start',

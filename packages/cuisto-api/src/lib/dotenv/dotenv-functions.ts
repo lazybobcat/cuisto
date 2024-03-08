@@ -21,14 +21,19 @@ export const doParse = (content: string): Record<string, string> => {
         }, {} as Record<string, string>);
 };
 
-export const doStringify = (configurations: Record<string, string>, domain: string): string => {
+export const doStringify = (configurations: Record<string, string>): string => {
     let content = '';
 
-    content += `\n\n###> ${domain} ###\n`;
     for (const [key, value] of Object.entries(configurations)) {
         content += `${key}=${JSON.stringify(value)}\n`;
     }
-    content += `###< ${domain} ###\n`;
 
     return content;
+};
+
+export const doMerge = (base: Record<string, string>, toMerge: Record<string, string>): Record<string, string> => {
+    return {
+        ...base,
+        ...toMerge,
+    };
 };

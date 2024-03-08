@@ -1,4 +1,4 @@
-import {doParse, doStringify} from './gitignore-functions';
+import {doMerge, doParse, doStringify} from './gitignore-functions';
 import {VirtualFS} from '../virtual-fs';
 
 /**
@@ -6,15 +6,12 @@ import {VirtualFS} from '../virtual-fs';
  * Use it to read and write .gitignore files.
  */
 export class Gitignore {
-    private readonly domain: string;
-
     /**
      * @param vfs Virtual file system containing the .gitignore file(s)
      * @param filePath Path to the .gitignore file to use (by default '.gitignore' at the root of the project)
      */
-    constructor(private readonly vfs: VirtualFS, private readonly filePath = '.gitignore') {
-        this.domain = process.env['RECIPE_NAME'] || '';
-    }
+    // eslint-disable-next-line no-empty-function
+    constructor(private readonly vfs: VirtualFS, private readonly filePath = '.gitignore') {}
 
     /**
      * Read the .gitignore file and return the patterns as an array of strings
@@ -43,9 +40,7 @@ export class Gitignore {
             return;
         }
 
-        const fileContent = this.vfs.read(this.filePath, 'utf-8') || '';
-        const envContent = doStringify(patterns, this.domain);
-
-        this.vfs.write(this.filePath, fileContent + envContent);
+        const fileContent = doParse(this.vfs.read(this.filePath, 'utf-8') || '');
+        this.vfs.write(this.filePath, doStringify(doMerge(fileContent, patterns)));
     };
 }

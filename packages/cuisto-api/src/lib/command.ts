@@ -1,26 +1,6 @@
-import {confirm} from '@inquirer/prompts';
 import {execaCommand} from 'execa';
 
-import {spinner, verbose} from './output';
-
-const dangerousCommands = [
-    'sudo',
-    'rm',
-    'rmdir',
-    'unlink',
-    'mv',
-    'cp',
-    'chmod',
-    'chown',
-    'chgrp',
-    'dd',
-    'mkfs',
-    'mke2fs',
-    'mkfs.ext2',
-    'mkfs.ext3',
-    'mkfs.ext4',
-    '>', '>>',
-];
+import {verbose} from './verbose';
 
 export class Command {
     /**
@@ -33,36 +13,24 @@ export class Command {
         dryRun = 'true' === process.env['DRY_RUN'] || dryRun;
         const verbosity = Number(process.env['VERBOSE']) || 0;
 
-        // check if command has a dangerous bit in it
-        for (const dangerousCommand of dangerousCommands) {
-            if (command.includes(dangerousCommand)) {
-                console.warn(`The recipe contains the following dangerous command: "${command}".`);
-                const answer = await confirm({message: 'Do you want to execute it and continue?', default: false});
-                if (!answer) {
-                    throw new Error(`Command "${command}" is dangerous and will not be executed`);
-                }
-            }
-        }
+        return this.doRun(command, dryRun, verbosity);
+    }
 
-        const progress = spinner(`Executing command "${command}"`);
+    private static async doRun(command: string, dryRun: boolean, verbosity: number): Promise<string> {
+        const suffix = dryRun ? ' (dry run)' : '';
+        verbose(`Running command: "${command}"${suffix}`, {verbose: verbosity});
+
         if (!dryRun) {
-            progress.render();
             const promise = await execaCommand(command);
             if (promise.failed) {
-                progress.fail();
                 if (undefined !== promise.all) {
                     verbose(promise.all, {verbose: verbosity});
                 }
                 throw new Error(`Command "${command}" failed`);
             }
 
-            progress.succeed();
-
             return promise.stdout;
         }
-
-        progress.prefixText = '[DRY RUN]';
-        progress.succeed();
 
         return '';
     }

@@ -6,14 +6,17 @@ export const doParse = (content: string): string[] => {
         .filter(line => false === line.startsWith('#'));
 };
 
-export const doStringify = (patterns: string[], domain: string): string => {
+export const doStringify = (patterns: string[]): string => {
     let content = '';
 
-    content += `\n\n###> ${domain} ###\n`;
     for (const pattern of patterns) {
         content += `${pattern}\n`;
     }
-    content += `###< ${domain} ###\n`;
 
     return content;
+};
+
+export const doMerge = (base: string[], toMerge: string[]): string[] => {
+    // new Set to avoid duplicates
+    return [...new Set([...base, ...toMerge])];
 };

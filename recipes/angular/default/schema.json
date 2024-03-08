@@ -4,7 +4,7 @@
     "properties": {
         "ngListenPort": {
             "type": "number",
-            "description": "What port should the Angular server listen on?",
+            "description": "What port should the Angular server listen to?",
             "default": 4200
         }
     }

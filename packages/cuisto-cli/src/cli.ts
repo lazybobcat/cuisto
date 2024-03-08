@@ -2,22 +2,22 @@
 
 import {Command} from 'commander';
 
-import {VirtualFS, Yaml, printError, printInfo, printSuccess, verbose} from '@lazybobcat/cuisto-api';
-import {confirm} from '@inquirer/prompts';
+import {VirtualFS, Yaml, verbose} from '@lazybobcat/cuisto-api';
 import {execa} from 'execa';
 import fs from 'node:fs';
 
-import {Properties, applyChanges, askProperties, doesRecipeContainDangerousCode} from './lib/cuisto-cli';
+import {printError, printInfo} from './lib/output';
+import {installAction} from './lib/install.action';
 
 function increaseVerbosity(_: string, previous: number): number {
     return previous + 1;
 }
 
 const metadata = await import('../package.json', {with: {type: 'json'}});
+process.env['RECIPE_DEPENDENCIES'] = JSON.stringify(metadata.default.dependencies);
 
 /*****************/
 const dirpath = fs.realpathSync('.');
-const recipesPath = '/media/dev/www/cuisto/recipes';
 
 /*****************/
 
@@ -46,77 +46,7 @@ program.command('install <recipe> [version]')
         version: string,
         options: { property: { [name: string]: string }, yes: boolean, verbose: number, dryRun: boolean }
     ) => {
-        printInfo(`🍳 Cooking "${recipe}"...`);
-
-        // Version
-        version = version || 'default';
-        const path = `${recipesPath}/${recipe}/${version}`;
-        verbose(`Check recipe at path ${path}`, options);
-
-        let schema: { main: string, properties: Properties } | undefined = undefined;
-
-        // Load the "schema.json" file from the given recipe
-        try {
-            const data = fs.readFileSync(`${path}/schema.json`, 'utf8');
-            schema = JSON.parse(data);
-        } catch (e) {
-            verbose(e instanceof Error ? e.message : String(e), options);
-            printError(`The recipe ${recipe} does not exist.`);
-            process.exit(1);
-        }
-
-        if (!schema?.main) {
-            verbose(JSON.stringify(schema), options);
-            printError('No main file found in the recipe schema.');
-            process.exit(1);
-        }
-
-        try {
-            fs.readFileSync(`${path}/${schema.main}`, 'utf8');
-        } catch (e) {
-            verbose(e instanceof Error ? e.message : String(e), options);
-            printError(`The main file ${schema.main} does not exist in the recipe.`);
-            process.exit(1);
-        }
-
-        if (doesRecipeContainDangerousCode(path, options)) {
-            printError('The recipe contains dangerous code.');
-            // the user should be warned and asked if they want to continue
-            const answer = await confirm({message: 'Do you want to continue anyway?', default: false});
-            if (!answer) {
-                process.exit(1);
-            }
-        }
-
-        // Execute the main file
-        const vfs = new VirtualFS(dirpath, options.verbose);
-        const r = await import(`${path}/${schema.main}`);
-
-        // define environment variables that can be used in the recipe
-        process.env['DRY_RUN'] = options.dryRun ? 'true' : 'false';
-        process.env['VERBOSE'] = String(options.verbose);
-        process.env['RECIPE_NAME'] = recipe;
-        process.env['RECIPE_DEPENDENCIES'] = JSON.stringify(metadata.default.dependencies);
-
-        // Extract properties from the schema and ask the user to fill it interactively
-        const properties = await askProperties(schema.properties, options.property, options);
-
-        // Execute the recipe
-        await r.default({
-            vfs,
-            properties,
-        });
-
-        // If there are changes to the vfs, merge them
-        if (!options.dryRun && vfs.hasChanges()) {
-            console.log(vfs.tree());
-            const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
-            if (answer) {
-                await applyChanges(vfs, options.verbose);
-            }
-        }
-
-        printSuccess(`The recipe ${recipe} has been successfully executed!`);
+        await installAction(recipe, version || 'default', dirpath, options);
     });
 
 program.command('test')
@@ -133,7 +63,6 @@ program.command('test')
 
         vfs.write('docker-compose.out.yaml', Yaml.stringify(doc));
         console.log(vfs.tree());
-        applyChanges(vfs, options.verbose);
     });
 
 

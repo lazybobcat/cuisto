@@ -1,7 +1,7 @@
-import {doParse, doStringify} from './gitignore-functions';
+import {doMerge, doParse, doStringify} from './gitignore-functions';
 
-describe('.gitignore doParse', () => {
-    it('should parse a .gitignore file', () => {
+describe('doParse', () => {
+    test('should parse a .gitignore file', () => {
         const content = `
 node_modules/
         `;
@@ -9,7 +9,7 @@ node_modules/
         expect(result).toEqual(['node_modules/']);
     });
 
-    it('should parse a .gitignore file with comments', () => {
+    test('should parse a .gitignore file with comments', () => {
         const content = `
 # Ignore node_modules
 node_modules/
@@ -18,7 +18,7 @@ node_modules/
         expect(result).toEqual(['node_modules/']);
     });
 
-    it('should parse a .gitignore file with comments and empty lines', () => {
+    test('should parse a .gitignore file with comments and empty lines', () => {
         const content = `
 # Ignore node_modules
 node_modules/
@@ -30,7 +30,7 @@ dist/
         expect(result).toEqual(['node_modules/', 'dist/']);
     });
 
-    it('should parse a .gitignore file with negation !name', () => {
+    test('should parse a .gitignore file with negation !name', () => {
         const content = `
 dist/
 !dist/.gitkeep
@@ -40,18 +40,34 @@ dist/
     });
 });
 
-describe('.gitignore doStringify', () => {
-    it('should stringify a .gitignore file', () => {
+describe('doStringify', () => {
+    test('should stringify a .gitignore file', () => {
         const files = ['node_modules/'];
         const domain = 'my-app';
         const result = doStringify(files, domain);
-        expect(result).toEqual('\n\n###> my-app ###\nnode_modules/\n###< my-app ###\n');
+        expect(result).toEqual('node_modules/\n');
     });
 
-    it('should stringify a .gitignore file with several elements', () => {
+    test('should stringify a .gitignore file with several elements', () => {
         const files = ['node_modules/', 'dist/', '!dist/.gitkeep'];
         const domain = 'my-app';
         const result = doStringify(files, domain);
-        expect(result).toEqual('\n\n###> my-app ###\nnode_modules/\ndist/\n!dist/.gitkeep\n###< my-app ###\n');
+        expect(result).toEqual('node_modules/\ndist/\n!dist/.gitkeep\n');
+    });
+});
+
+describe('doMerge', () => {
+    test('should merge two .gitignore files', () => {
+        const base = ['node_modules/'];
+        const toMerge = ['dist/', '!dist/.gitkeep'];
+        const result = doMerge(base, toMerge);
+        expect(result).toEqual(['node_modules/', 'dist/', '!dist/.gitkeep']);
+    });
+
+    test('should merge two .gitignore files with duplicates', () => {
+        const base = ['node_modules/', 'dist/'];
+        const toMerge = ['dist/', '!dist/.gitkeep'];
+        const result = doMerge(base, toMerge);
+        expect(result).toEqual(['node_modules/', 'dist/', '!dist/.gitkeep']);
     });
 });

@@ -1,9 +1,10 @@
-import {MakeDirectoryOptions, Mode, WriteFileOptions, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync} from 'node:fs';
+import {MakeDirectoryOptions, Mode, WriteFileOptions, existsSync, readFileSync, readdirSync, statSync} from 'node:fs';
 import {dirname, join, relative, sep} from 'path';
+import {mkdir, writeFile} from 'node:fs/promises';
 
 import {changesToTree, printTree} from './print-tree';
 import {Changes} from './file-change';
-import {verbose} from './output';
+import {verbose} from './verbose';
 
 /**
  * A virtual file system that can be used to simulate file system operations.
@@ -253,14 +254,16 @@ export class VirtualFS {
     };
 }
 
-export const outputFileSync = (path: string, content: Buffer | string, options: {mode?: Mode} = {}): void => {
+export const outputFile = async (path: string, content: Buffer | string, options: {mode?: Mode} = {}): Promise<void> => {
     const mkdirOptions: MakeDirectoryOptions = {recursive: true};
     const writeOptions: WriteFileOptions = {};
     if (options.mode) {
         mkdirOptions.mode = options.mode;
         writeOptions.mode = options.mode;
     }
-    mkdirSync(dirname(path), mkdirOptions);
-    writeFileSync(path, content, writeOptions);
+
+    await mkdir(dirname(path), mkdirOptions);
+
+    return writeFile(path, content, writeOptions);
 };
 

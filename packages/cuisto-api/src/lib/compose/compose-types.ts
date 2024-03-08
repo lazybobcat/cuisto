@@ -1,4 +1,4 @@
-export type ComposeService = {
+export type ComposeServices = {
     [name: string]: {
         image: string;
         ports?: string[];
@@ -13,7 +13,7 @@ export type ComposeService = {
 export type DockerComposeConfiguration = {
     version?: string;
     include?: string[];
-    services?: ComposeService;
+    services?: ComposeServices;
     volumes?: {
         [name: string]: string;
     };

@@ -1,6 +1,6 @@
-import {doParse, doStringify} from './dotenv-functions';
+import {doMerge, doParse, doStringify} from './dotenv-functions';
 
-describe('DotEnv.readEnvironmentVariables', () => {
+describe('doParse', () => {
     test('should parse a simple env file', () => {
         const content = `
             FOO=bar
@@ -59,15 +59,15 @@ quux"
     });
 });
 
-describe('DotEnv.addEnvironmentVariables', () => {
+describe('doStringify', () => {
     test('should stringify a simple env file', () => {
         const configurations = {
             FOO: 'bar',
             BAZ: 'qux',
         };
 
-        const result = doStringify(configurations, 'domain');
-        expect(result).toEqual('\n\n###> domain ###\nFOO="bar"\nBAZ="qux"\n###< domain ###\n');
+        const result = doStringify(configurations);
+        expect(result).toEqual('FOO="bar"\nBAZ="qux"\n');
     });
 
     test('should stringify a simple env file with multi-line values', () => {
@@ -76,8 +76,8 @@ describe('DotEnv.addEnvironmentVariables', () => {
             BAZ: 'qux\nquux',
         };
 
-        const result = doStringify(configurations, 'domain');
-        expect(result).toEqual('\n\n###> domain ###\nFOO="bar"\nBAZ="qux\\nquux"\n###< domain ###\n');
+        const result = doStringify(configurations);
+        expect(result).toEqual('FOO="bar"\nBAZ="qux\\nquux"\n');
     });
 
     test('should stringify a simple env file with quotes', () => {
@@ -86,7 +86,68 @@ describe('DotEnv.addEnvironmentVariables', () => {
             BAZ: "'qux'",
         };
 
-        const result = doStringify(configurations, 'domain');
-        expect(result).toEqual('\n\n###> domain ###\nFOO="\\"bar\\""\nBAZ="\'qux\'"\n###< domain ###\n');
+        const result = doStringify(configurations);
+        expect(result).toEqual('FOO="\\"bar\\""\nBAZ="\'qux\'"\n');
+    });
+});
+
+describe('doMerge', () => {
+    test('should merge two env files', () => {
+        const base = {
+            FOO: 'bar',
+        };
+        const toMerge = {
+            BAZ: 'qux',
+        };
+
+        const result = doMerge(base, toMerge);
+        expect(result).toEqual({
+            FOO: 'bar',
+            BAZ: 'qux',
+        });
+    });
+
+    test('should merge two env files with multi-line values', () => {
+        const base = {
+            FOO: 'bar',
+        };
+        const toMerge = {
+            BAZ: 'qux\nquux',
+        };
+
+        const result = doMerge(base, toMerge);
+        expect(result).toEqual({
+            FOO: 'bar',
+            BAZ: 'qux\nquux',
+        });
+    });
+
+    test('should merge two env files with quotes', () => {
+        const base = {
+            FOO: '"bar"',
+        };
+        const toMerge = {
+            BAZ: "'qux'",
+        };
+
+        const result = doMerge(base, toMerge);
+        expect(result).toEqual({
+            FOO: '"bar"',
+            BAZ: "'qux'",
+        });
+    });
+
+    test('should merge two env files with the same key by overriding', () => {
+        const base = {
+            FOO: 'bar',
+        };
+        const toMerge = {
+            FOO: 'qux',
+        };
+
+        const result = doMerge(base, toMerge);
+        expect(result).toEqual({
+            FOO: 'qux',
+        });
     });
 });

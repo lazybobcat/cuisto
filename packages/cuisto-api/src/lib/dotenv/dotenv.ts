@@ -1,12 +1,9 @@
-import {doParse, doStringify} from './dotenv-functions';
+import {doMerge, doParse, doStringify} from './dotenv-functions';
 import {VirtualFS} from '../virtual-fs';
 
 export class DotEnv {
-    private readonly domain: string;
-
-    constructor(private readonly vfs: VirtualFS, private readonly filePath = '.env') {
-        this.domain = process.env['RECIPE_NAME'] || '';
-    }
+    // eslint-disable-next-line no-empty-function
+    constructor(private readonly vfs: VirtualFS, private readonly filePath = '.env') {}
 
     readEnvironmentVariables = (): Record<string, string> => {
         const content = this.vfs.read(this.filePath, 'utf-8');
@@ -19,10 +16,8 @@ export class DotEnv {
             return;
         }
 
-        const fileContent = this.vfs.read(this.filePath, 'utf-8') || '';
-        const envContent = doStringify(configurations, this.domain);
-
-        this.vfs.write(this.filePath, fileContent + envContent);
+        const fileContent = doParse(this.vfs.read(this.filePath, 'utf-8') || '');
+        this.vfs.write(this.filePath, doStringify(doMerge(fileContent, configurations)));
     };
 }
 

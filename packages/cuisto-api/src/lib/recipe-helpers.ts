@@ -1,5 +1,3 @@
-import {printError} from './output';
-
 export class Helper {
     /**
      * Print an error message and exit the process with code 1.
@@ -10,7 +8,7 @@ export class Helper {
      * }
      */
     static errorAndExit(message: string): never {
-        printError(message);
+        console.error(message);
         process.exit(1);
     }
 }
