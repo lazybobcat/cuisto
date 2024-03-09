@@ -2,9 +2,15 @@
     "name": "angular",
     "main": "index.js",
     "properties": {
+        "project": {
+            "type": "string",
+            "description": "What is the directory that should be created for the Angular project?",
+            "required": true,
+            "default": "frontend"
+        },
         "ngListenPort": {
             "type": "number",
-            "description": "What port should the Angular server listen to?",
+            "description": "What port on the host should the Angular server listen to?",
             "default": 4200
         }
     }

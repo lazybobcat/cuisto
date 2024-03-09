@@ -108,6 +108,7 @@ async function executeRecipe(
     await recipe.default({
         vfs,
         properties,
+        recipePath: path,
     });
 
     if (!options.dryRun && vfs.hasChanges()) {

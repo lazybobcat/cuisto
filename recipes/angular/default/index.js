@@ -1,6 +1,6 @@
-import {DockerCompose, DotEnv, Gitignore, Helper} from '@lazybobcat/cuisto-api';
+import {DockerCompose, DotEnv, FileGenerator, Gitignore, Helper} from '@lazybobcat/cuisto-api';
 
-export default async function({ vfs, properties }) {
+export default async function({ vfs, properties, recipePath }) {
     // console.log(properties);
     // console.log(vfs.root);
 
@@ -33,4 +33,9 @@ export default async function({ vfs, properties }) {
         '/dist',
         '/.env',
     ]);
+
+    const fg = new FileGenerator(vfs);
+    fg.generateFiles(`${recipePath}/files`, vfs.root, {
+        project: properties['project'],
+    });
 };

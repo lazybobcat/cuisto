@@ -21,7 +21,6 @@ export const doesRecipeContainDangerousCode = (recipePath: string, options: {ver
         'mkfs.ext2 ',
         'mkfs.ext3 ',
         'mkfs.ext4 ',
-        '>', '>>',
     ];
     const dangerousImportRxp = /(import|require)(.*)(node:|fs|child_process)/;
 
@@ -30,26 +29,28 @@ export const doesRecipeContainDangerousCode = (recipePath: string, options: {ver
         const filePath = join(recipePath, path);
         const file = lstatSync(filePath);
         if (file.isDirectory()) {
-            return path !== 'node_modules' ? doesRecipeContainDangerousCode(filePath, options) : false;
-        }
+            if (path !== 'node_modules' && doesRecipeContainDangerousCode(filePath, options)) {
+                return true;
+            }
+        } else {
+            const content = readFileSync(filePath, 'utf8');
+            // Ignore config files files
+            if (/^(.+).(json|yaml|yml|toml|xml|html|md|mx)$/.test(filePath)) {
+                continue;
+            }
 
-        const content = readFileSync(filePath, 'utf8');
-        // Ignore *.md files
-        if (filePath.endsWith('.md')) {
-            continue;
-        }
+            for (const dangerousCommand of dangerousCommands) {
+                if (content.includes(dangerousCommand)) {
+                    verbose(`Recipe file ${filePath} contains dangerous command "${dangerousCommand}"`, options);
 
-        for (const dangerousCommand of dangerousCommands) {
-            if (content.includes(dangerousCommand)) {
-                verbose(`Recipe file ${filePath} contains dangerous command "${dangerousCommand}"`, options);
+                    return true;
+                }
+            }
+            if (dangerousImportRxp.test(content)) {
+                verbose(`Recipe file ${filePath} contains dangerous import`, options);
 
                 return true;
             }
-        }
-        if (dangerousImportRxp.test(content)) {
-            verbose(`Recipe file ${filePath} contains dangerous import`, options);
-
-            return true;
         }
     }
 

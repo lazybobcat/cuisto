@@ -1,6 +1,7 @@
 export * from './lib/command';
 export * from './lib/compose/compose';
 export * from './lib/dotenv/dotenv';
+export * from './lib/file-generator/file-generator';
 export * from './lib/git/gitignore';
 export * from './lib/recipe-helpers';
 export * from './lib/print-tree';
