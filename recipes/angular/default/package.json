@@ -1,7 +1,0 @@
-{
-    "type": "module",
-    "name": "angular",
-    "dependencies": {
-        "@lazybobcat/cuisto-api": "file:/media/dev/www/cuisto/dist/packages/cuisto-api"
-    }
-}

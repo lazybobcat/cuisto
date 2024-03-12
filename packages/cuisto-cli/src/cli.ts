@@ -43,13 +43,28 @@ program
 
 program.command('init')
     .description('Initialize a new project with a .cuistorc.json file')
-    .option('-p, --property <name>=<value>', 'Set a property for the recipe', aggregateProperties, {})
+    .argument('[projectName]', 'The name of the project')
     .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
-    .action(async (
-        options: { property: { [name: string]: string }, yes: boolean, verbose: number, dryRun: boolean }
-    ) => {
+    .action(async (projectName: string | undefined, options: {verbose: number}) => {
         const recipe = `${cliPath}/recipes/init`;
-        await installAction(recipe, '', dirPath, {...options, yes: true, dryRun: false}, configuration);
+        let properties = {};
+        if (projectName) {
+            properties = {projectName: projectName};
+        }
+        await installAction(recipe, '', dirPath, {property: properties, yes: true, dryRun: false, verbose: options.verbose}, configuration);
+    });
+
+program.command('new-recipe')
+    .description('Initialize code and configuration files for a new cuisto recipe')
+    .argument('[recipeName]', 'The name of the recipe')
+    .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
+    .action(async (recipeName: string | undefined, options: {verbose: number}) => {
+        const recipe = `${cliPath}/recipes/new-recipe`;
+        let properties = {};
+        if (recipeName) {
+            properties = {recipeName: recipeName};
+        }
+        await installAction(recipe, '', dirPath, {property: properties, yes: true, dryRun: false, verbose: options.verbose}, configuration);
     });
 
 program.command('install')

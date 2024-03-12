@@ -1,0 +1,7 @@
+{
+    "type": "module",
+    "name": "<%= recipeName %>",
+    "dependencies": {
+        "@lazybobcat/cuisto-api": "latest"
+    }
+}

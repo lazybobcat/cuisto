@@ -1,0 +1,6 @@
+{
+    "$schema": "https://raw.githubusercontent.com/lazybobcat/cuisto/main/cuistoschema.schema.json",
+    "name": "<%= recipeName %>",
+    "main": "index.js",
+    "properties": {}
+}

@@ -61,7 +61,7 @@
                                     "type": "string"
                                 },
                                 "default": {
-                                    "type": "integer"
+                                    "type": "array"
                                 },
                                 "multiple": {
                                     "type": "boolean"

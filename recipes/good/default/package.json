@@ -1,7 +1,0 @@
-{
-  "type": "module",
-  "name": "good-recipe",
-  "dependencies": {
-    "@inquirer/prompts": "^4.1.0"
-  }
-}

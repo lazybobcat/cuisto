@@ -1,0 +1,12 @@
+{
+    "$schema": "https://raw.githubusercontent.com/lazybobcat/cuisto/main/cuistoschema.schema.json",
+    "name": "cuisto/new-recipe",
+    "main": "index.js",
+    "properties": {
+        "recipeName": {
+            "type": "string",
+            "description": "What is the name of the recipe?",
+            "required": true
+        }
+    }
+}

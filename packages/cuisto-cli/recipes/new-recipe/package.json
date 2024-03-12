@@ -1,0 +1,7 @@
+{
+    "type": "module",
+    "name": "cuisto/new-recipe",
+    "dependencies": {
+        "@lazybobcat/cuisto-api": "latest"
+    }
+}

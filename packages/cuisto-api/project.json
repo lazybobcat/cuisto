@@ -28,6 +28,18 @@
                 "build"
             ]
         },
+        "install": {
+            "executor": "nx:run-commands",
+            "options": {
+                "cwd": "dist/packages/cuisto-api",
+                "commands": [
+                    "HUSKY=0 npm install -g --install-links"
+                ]
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
         "lint": {
             "executor": "@nx/eslint:lint",
             "outputs": [

@@ -34,7 +34,6 @@ export async function installAction(
     process.env['RECIPE_NAME'] = recipe;
 
     if (null === configuration) {
-        // @TODO: remove this error when github will be the default recipe source
         printError('No configuration found. Please provite a .cuistorc.json file in the project.');
         process.exit(1);
     }
@@ -95,18 +94,18 @@ async function cloneRecipe(recipe: string, branch: string, path: string, recipeS
         const {stdout} = await execa('git', ['clone', '--depth=1', '--branch', branch, url, path]);
         verbose(stdout, options);
     }
-    // Install npm dependencies
-    {
-        verbose(`Install npm dependencies in ${path}`, options);
-        const {stdout} = await execa('npm', ['--prefix', path, 'install']);
-        verbose(stdout, options);
-    }
 }
 
 async function loadSchema(recipe: string, branch: string, path: string, recipeSources: string[], options: Options): Promise<Schema> {
     // Check if the recipe exists locally
     verbose(`Check recipe at path ${path}`, options);
     let schema: { main: string; properties: Properties; } | undefined = undefined;
+
+    // Install npm dependencies
+    verbose(`Install npm dependencies in ${path}`, options);
+    const {stdout} = await execa('npm', ['--prefix', path, 'install']);
+    verbose(stdout, options);
+
     // Load the "schema.json" file from the given recipe
     try {
         const data = fs.readFileSync(`${path}/schema.json`, 'utf8');
