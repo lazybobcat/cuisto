@@ -1,0 +1,5 @@
+{
+    "$schema": "https://raw.githubusercontent.com/lazybobcat/cuisto/main/cuistorc.schema.json",
+    "name": "<%= projectName %>",
+    "recipe_sources": []
+}

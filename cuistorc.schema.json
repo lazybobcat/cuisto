@@ -1,0 +1,21 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "$id": "https://github.com/lazybobcat/cuisto/blob/main/cuistorc.schema.json",
+    "title": "cuistorc",
+    "description": "Generated schema for .cuistorc.json configuration files",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "recipe_sources": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": [
+        "name"
+    ]
+}

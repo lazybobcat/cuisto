@@ -1,0 +1,102 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "$id": "https://github.com/lazybobcat/cuisto/blob/main/cuistoschema.schema.json",
+    "title": "cuisto schema",
+    "description": "The schema for the recipe schema.json file",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "main": {
+            "type": "string"
+        },
+        "properties": {
+            "patternProperties": {
+                "^.*$": {
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "description"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "number"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "description"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "choice"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "type": "integer"
+                                },
+                                "multiple": {
+                                    "type": "boolean"
+                                },
+                                "choices": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "value": {
+                                                "type": "string"
+                                            },
+                                            "name": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "value"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "description",
+                                "choices"
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "required": [
+        "name",
+        "main"
+    ]
+}

@@ -16,7 +16,8 @@
         "outputFileName": "cli.js",
         "tsConfig": "packages/cuisto-cli/tsconfig.lib.json",
         "assets": [
-          "packages/cuisto-cli/*.md"
+          "packages/cuisto-cli/*.md",
+          "packages/cuisto-cli/recipes/**/*"
         ],
         "generatePackageJson": true,
         "format": [
@@ -38,7 +39,11 @@
     "install": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd dist/packages/cuisto-cli && HUSKY=0 npm install -g --install-links"
+        "cwd": "dist/packages/cuisto-cli",
+        "commands": [
+            "sed -i -E \"s/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"(.+)\\\"/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"..\\\/cuisto-api\\\"/\" package.json",
+            "HUSKY=0 npm install -g --install-links"
+        ]
       },
       "dependsOn": [
         "build"

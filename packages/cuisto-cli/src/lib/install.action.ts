@@ -40,12 +40,20 @@ export async function installAction(
     }
 
     const recipeSources = configuration.config.recipe_sources || [];
-    const path = `${recipesPath}/${recipe}/${branch}`;
+    let path = `${recipesPath}/${recipe}/${branch}`;
     const vfs = new VirtualFS(executionPath, options.verbose);
 
+    if ((recipe.startsWith('.') || recipe.startsWith('/')) && fs.existsSync(recipe)) {
+        path = recipe;
+    } else {
+        await asyncTask(
+            cloneRecipe(recipe, branch, path, recipeSources, options),
+            info(`📖 Looking for the recipe "${recipe}"...`, false)
+        );
+    }
     const schema = await asyncTask(
         loadSchema(recipe, branch, path, recipeSources, options),
-        info(`📖 Looking for the recipe "${recipe}"...`, false)
+        info(`🌱 Loading the recipe "${recipe}"...`, false)
     );
     await asyncTask(
         spinner => checkDangerousCode(path, options, spinner),
@@ -65,7 +73,7 @@ export async function installAction(
     printSuccess('The recipe has been successfully executed!');
 }
 
-async function loadSchema(recipe: string, branch: string, path: string, recipeSources: string[], options: Options): Promise<Schema> {
+async function cloneRecipe(recipe: string, branch: string, path: string, recipeSources: string[], options: Options): Promise<void> {
     // Scan recipe sources to find the recipe in a git repository:
     const url = await findRepositoryUrl(recipeSources, recipe, branch);
     if (null === url) {
@@ -93,7 +101,9 @@ async function loadSchema(recipe: string, branch: string, path: string, recipeSo
         const {stdout} = await execa('npm', ['--prefix', path, 'install']);
         verbose(stdout, options);
     }
+}
 
+async function loadSchema(recipe: string, branch: string, path: string, recipeSources: string[], options: Options): Promise<Schema> {
     // Check if the recipe exists locally
     verbose(`Check recipe at path ${path}`, options);
     let schema: { main: string; properties: Properties; } | undefined = undefined;
@@ -120,6 +130,8 @@ async function loadSchema(recipe: string, branch: string, path: string, recipeSo
         printError(`The main file ${schema.main} does not exist in the recipe.`);
         process.exit(1);
     }
+
+    verbose(`Schema loaded: ${path}/schema.json`, options);
 
     return schema;
 }

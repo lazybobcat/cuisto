@@ -3,8 +3,8 @@
 import {Command} from 'commander';
 
 import {VirtualFS, Yaml, verbose} from '@lazybobcat/cuisto-api';
-import {dirname, join} from 'node:path';
 import {cosmiconfig} from 'cosmiconfig';
+import {dirname} from 'node:path';
 import {execa} from 'execa';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs';
@@ -16,37 +16,49 @@ function increaseVerbosity(_: string, previous: number): number {
     return previous + 1;
 }
 
+function aggregateProperties(v: string, acc: { [name: string]: string | undefined }): { [name: string]: string | undefined } {
+    const [name, value] = v.split('=');
+    if (name) {
+        acc[name] = value;
+    }
+
+    return acc;
+}
+
 /*****************/
 const metadata = await import('../package.json', {with: {type: 'json'}});
 process.env['RECIPE_DEPENDENCIES'] = JSON.stringify(metadata.default.dependencies);
-/*****************/
-const explorer = cosmiconfig('cuisto');
-const configuration = await explorer.search();
-/*****************/
 const dirPath = fs.realpathSync('.');
 const cliPath = dirname(fileURLToPath(import.meta.url));
-process.env['NODE_PATH'] = join(cliPath, 'node_modules', '@lazybobcat', 'cuisto-api');
+/*****************/
+const explorer = cosmiconfig('cuisto');
+const configuration = await explorer.search() || {config: {}, filepath: dirPath};
+configuration.config.recipe_sources = [...configuration?.config.recipe_sources || [], 'https://github.com'];
 /*****************/
 
 const program = new Command();
 program
     .version(metadata.default.version, '--version')
-    .description('Install and update your project based on recipes, cuisto will bake them for you!')
-    .option('-i, --init', 'Initialize a new cuisto project'); // TODO: implement the init command
+    .description('Install and update your project based on recipes, cuisto will bake them for you!');
+
+
+program.command('init')
+    .description('Initialize a new project with a .cuistorc.json file')
+    .option('-p, --property <name>=<value>', 'Set a property for the recipe', aggregateProperties, {})
+    .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
+    .action(async (
+        options: { property: { [name: string]: string }, yes: boolean, verbose: number, dryRun: boolean }
+    ) => {
+        const recipe = `${cliPath}/recipes/init`;
+        await installAction(recipe, '', dirPath, {...options, yes: true, dryRun: false}, configuration);
+    });
 
 program.command('install')
     .alias('i')
     .description('Install the given recipe')
     .argument('<recipe>', 'The git repository short name of the recipe, depending on your "recipe_sources" configuration in .cuistorc.json')
     .argument('[branch]', 'The branch or tag to install, default to "main"', 'main')
-    .option('-p, --property <name>=<value>', 'Set a property for the recipe', (v, acc: { [name: string]: string | undefined }) => {
-        const [name, value] = v.split('=');
-        if (name) {
-            acc[name] = value;
-        }
-
-        return acc;
-    }, {})
+    .option('-p, --property <name>=<value>', 'Set a property for the recipe', aggregateProperties, {})
     .option('-y, --yes', 'Non interactive mode', false)
     .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
     .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
