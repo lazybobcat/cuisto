@@ -25,7 +25,7 @@ export default async function({ vfs, properties, recipePath }) {
             volumes: ['../:/app'], // This is a relative path, it will be resolved to the '.compose' directory
             working_dir: '/app',
         }
-    });
+    }, 'angular.compose.yaml');
 
     const gi = new Gitignore(vfs);
     gi.addPatterns([

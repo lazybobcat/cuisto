@@ -8,6 +8,7 @@ export const findRepositoryUrl = async (recipeSources: string[], recipe: string,
         try {
             await execa('git', ['ls-remote', '--heads', '--exit-code', git, `refs/heads/${branch}`]);
             url = git;
+            break;
         } catch (_) {
             continue;
         }

@@ -32,7 +32,7 @@ const cliPath = dirname(fileURLToPath(import.meta.url));
 /*****************/
 const explorer = cosmiconfig('cuisto');
 const configuration = await explorer.search() || {config: {}, filepath: dirPath};
-configuration.config.recipe_sources = [...configuration?.config.recipe_sources || [], 'https://github.com'];
+configuration.config.recipe_sources = [...configuration?.config.recipe_sources || [], 'git@github.com:'];
 /*****************/
 
 const program = new Command();

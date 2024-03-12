@@ -8,7 +8,7 @@ export class DockerCompose {
     private readonly domain: string;
 
     constructor(private readonly vfs: VirtualFS, private readonly filePath = 'docker-compose.yaml', private readonly composeDirectory = '.compose') {
-        this.domain = process.env['RECIPE_NAME'] ? `${process.env['RECIPE_NAME'].replace(/@\/-/, '_')}` : 'unknown';
+        this.domain = process.env['RECIPE_NAME'] ? `${process.env['RECIPE_NAME']?.replace(/[@/-]/, '_')}` : 'unknown';
     }
 
     readConfiguration = (): DockerComposeConfiguration => {
@@ -17,19 +17,19 @@ export class DockerCompose {
         return doParse(content || '');
     };
 
-    addServices = (services: ComposeServices): void => {
+    addServices = (services: ComposeServices, fileName: string | null = null): void => {
         // TODO : add unit tests for this method
         if (0 === Object.keys(services).length) {
             return;
         }
 
+        fileName = fileName || `${this.domain}.compose.yaml`;
         const baseConfig = this.readConfiguration();
-        const fileName = `${this.domain}.compose.yaml`;
         const serviceFilePath = join(this.composeDirectory, fileName);
         // push include path only if not already present
-        if (!baseConfig.include || !baseConfig.include.includes(fileName)) {
+        if (!baseConfig.include || !baseConfig.include.includes(serviceFilePath)) {
             baseConfig.include = baseConfig.include || [];
-            baseConfig.include.push(fileName);
+            baseConfig.include.push(serviceFilePath);
         }
 
         // merge the services

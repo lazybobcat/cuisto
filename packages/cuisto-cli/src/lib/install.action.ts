@@ -61,7 +61,7 @@ export async function installAction(
     );
     const properties = await asyncTask(
         spinner => askProperties((schema as Schema).properties, options.property, options, spinner),
-        info('🍄 Gathering ingredients...\n', false)
+        info('🍄 Gathering ingredients...', false)
     );
 
     // Execute the recipe
@@ -165,8 +165,10 @@ async function executeRecipe(
     });
 
     if (!options.dryRun && vfs.hasChanges()) {
-        progress.stopAndPersist();
-        console.log(vfs.tree());
+        if (!options.yes) {
+            progress.stopAndPersist();
+            console.log(vfs.tree());
+        }
         const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
         if (answer) {
             progress.start();
