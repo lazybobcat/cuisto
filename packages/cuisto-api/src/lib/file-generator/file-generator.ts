@@ -10,7 +10,6 @@ export class FileGenerator {
 
     generateFiles = (sourceDirectory: string, targetDirectory: string, variables: Variables): void => {
         const files = getAllDescendantFiles(sourceDirectory);
-        console.log(`Generating files from ${sourceDirectory} to ${targetDirectory}`, files);
         for (const file of files) {
             // we need to use EJS on the file contents to replace the variables (if the file is not a binary file)
             // we also need to replace the file name with the variables (such as __variable__ => value)
@@ -19,14 +18,12 @@ export class FileGenerator {
             }
             const targetPath = generateFilePath(sourceDirectory, targetDirectory, file, variables);
             const fileContent = readFileSync(file);
-            console.log(`Reading file ${file}`, fileContent);
 
             if (null === fileContent) {
                 continue;
             }
 
             const targetContent = generateFileContent(fileContent, variables);
-            console.log(`Writing file ${targetPath}`);
 
             this.vfs.write(targetPath, targetContent);
         }

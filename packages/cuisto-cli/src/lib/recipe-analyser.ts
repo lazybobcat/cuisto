@@ -23,13 +23,18 @@ export const doesRecipeContainDangerousCode = (recipePath: string, options: {ver
         'mkfs.ext4 ',
     ];
     const dangerousImportRxp = /(import|require)(.*)(node:|fs|child_process)/;
+    const ignoreDirectories = ['node_modules', '.git', '.vscode', '.idea', '.github', '.gitlab-ci'];
 
     // iterates on files in the recipe:
     for (const path of readdirSync(recipePath)) {
         const filePath = join(recipePath, path);
         const file = lstatSync(filePath);
         if (file.isDirectory()) {
-            if (path !== 'node_modules' && doesRecipeContainDangerousCode(filePath, options)) {
+            // Check if we should ignore the directory
+            if (ignoreDirectories.includes(path)) {
+                continue;
+            }
+            if (doesRecipeContainDangerousCode(filePath, options)) {
                 return true;
             }
         } else {

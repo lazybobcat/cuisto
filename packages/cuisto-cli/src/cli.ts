@@ -3,7 +3,10 @@
 import {Command} from 'commander';
 
 import {VirtualFS, Yaml, verbose} from '@lazybobcat/cuisto-api';
+import {dirname, join} from 'node:path';
+import {cosmiconfig} from 'cosmiconfig';
 import {execa} from 'execa';
+import {fileURLToPath} from 'node:url';
 import fs from 'node:fs';
 
 import {printError, printInfo} from './lib/output';
@@ -13,12 +16,16 @@ function increaseVerbosity(_: string, previous: number): number {
     return previous + 1;
 }
 
+/*****************/
 const metadata = await import('../package.json', {with: {type: 'json'}});
 process.env['RECIPE_DEPENDENCIES'] = JSON.stringify(metadata.default.dependencies);
-
 /*****************/
-const dirpath = fs.realpathSync('.');
-
+const explorer = cosmiconfig('cuisto');
+const configuration = await explorer.search();
+/*****************/
+const dirPath = fs.realpathSync('.');
+const cliPath = dirname(fileURLToPath(import.meta.url));
+process.env['NODE_PATH'] = join(cliPath, 'node_modules', '@lazybobcat', 'cuisto-api');
 /*****************/
 
 const program = new Command();
@@ -27,9 +34,11 @@ program
     .description('Install and update your project based on recipes, cuisto will bake them for you!')
     .option('-i, --init', 'Initialize a new cuisto project'); // TODO: implement the init command
 
-program.command('install <recipe> [version]')
+program.command('install')
     .alias('i')
     .description('Install the given recipe')
+    .argument('<recipe>', 'The git repository short name of the recipe, depending on your "recipe_sources" configuration in .cuistorc.json')
+    .argument('[branch]', 'The branch or tag to install, default to "main"', 'main')
     .option('-p, --property <name>=<value>', 'Set a property for the recipe', (v, acc: { [name: string]: string | undefined }) => {
         const [name, value] = v.split('=');
         if (name) {
@@ -43,10 +52,10 @@ program.command('install <recipe> [version]')
     .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
     .action(async (
         recipe: string,
-        version: string,
+        branch: string,
         options: { property: { [name: string]: string }, yes: boolean, verbose: number, dryRun: boolean }
     ) => {
-        await installAction(recipe, version || 'default', dirpath, options);
+        await installAction(recipe, branch, dirPath, options, configuration);
     });
 
 program.command('test')
@@ -54,7 +63,7 @@ program.command('test')
     .option('-y, --yes', 'Non interactive mode', false)
     .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
     .action(async (options: { verbose: number, yes: boolean, dryRun: boolean }) => {
-        const vfs = new VirtualFS(dirpath, options.verbose);
+        const vfs = new VirtualFS(dirPath, options.verbose);
         const doc = Yaml.parse<any>(vfs.read('docker-compose.yaml', 'utf-8') || '');
         doc.volumes = {
             name: 'test'
