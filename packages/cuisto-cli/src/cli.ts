@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import {Command} from 'commander';
-
-import {VirtualFS, Yaml, verbose} from '@lazybobcat/cuisto-api';
 import {cosmiconfig} from 'cosmiconfig';
 import {dirname} from 'node:path';
 import {execa} from 'execa';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs';
+import {verbose} from '@lazybobcat/cuisto-api';
 
 import {printError, printInfo} from './lib/output';
 import {installAction} from './lib/install.action';
@@ -69,23 +68,6 @@ program.command('install')
     ) => {
         await installAction(recipe, branch, dirPath, options, configuration);
     });
-
-program.command('test')
-    .option('-v, --verbose', 'Prints additional information during the execution of the command', increaseVerbosity, 0)
-    .option('-y, --yes', 'Non interactive mode', false)
-    .option('--dry-run, --dryRun', 'Preview the changes without updating the project', false)
-    .action(async (options: { verbose: number, yes: boolean, dryRun: boolean }) => {
-        const vfs = new VirtualFS(dirPath, options.verbose);
-        const doc = Yaml.parse<any>(vfs.read('docker-compose.yaml', 'utf-8') || '');
-        doc.volumes = {
-            name: 'test'
-        };
-        console.log(doc);
-
-        vfs.write('docker-compose.out.yaml', Yaml.stringify(doc));
-        console.log(vfs.tree());
-    });
-
 
 program.parse(process.argv);
 
