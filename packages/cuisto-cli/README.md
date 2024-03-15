@@ -1,5 +1,7 @@
 # cuisto-cli
 
+![Cuisto logo](./resources/images/logo.jpg)
+
 This library was generated with [Nx](https://nx.dev).
 
 ## Building

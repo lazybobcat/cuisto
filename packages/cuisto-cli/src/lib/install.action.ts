@@ -10,7 +10,7 @@ import {rm} from 'node:fs/promises';
 import {xdgData} from 'xdg-basedir';
 
 import {FlatProperties, Properties, askProperties} from './ask-properties';
-import {asyncTask, info, printError, printSuccess, printWarning} from './output';
+import {asyncTask, info, output, printError, printSuccess, printWarning} from './output';
 import {doesRecipeContainDangerousCode} from './recipe-analyser';
 import {findRepositoryUrl} from './git-operations';
 
@@ -18,7 +18,7 @@ import {findRepositoryUrl} from './git-operations';
 const dataDir = xdgData || join(homedir(), '.local', 'share');
 const recipesPath = join(dataDir, 'cuisto', 'recipes');
 
-type Schema = { main: string; properties: Properties; };
+type Schema = { name: string; main: string; properties: Properties; };
 type Options = { property: { [name: string]: string; }; yes: boolean; verbose: number; dryRun: boolean; };
 
 export async function installAction(
@@ -31,7 +31,7 @@ export async function installAction(
     // define environment variables that can be used in the recipe
     process.env['DRY_RUN'] = options.dryRun ? 'true' : 'false';
     process.env['VERBOSE'] = String(options.verbose);
-    process.env['RECIPE_NAME'] = recipe;
+    process.env['RECIPE_PATH'] = recipe;
 
     if (null === configuration) {
         printError('No configuration found. Please provite a .cuistorc.json file in the project.');
@@ -54,6 +54,7 @@ export async function installAction(
         loadSchema(recipe, branch, path, recipeSources, options),
         info(`🌱 Loading the recipe "${recipe}"...`, false)
     );
+    process.env['RECIPE_NAME'] = schema.name;
     await asyncTask(
         spinner => checkDangerousCode(path, options, spinner),
         info('🍪 Checking the diet...', false)
@@ -64,10 +65,8 @@ export async function installAction(
     );
 
     // Execute the recipe
-    await asyncTask(
-        spinner => executeRecipe(vfs, path, schema, properties, options, spinner),
-        info(`🍳 Cooking "${recipe}"...`, false)
-    );
+    console.log(info(`  🍳 Cooking "${recipe}"...`, false));
+    await executeRecipe(vfs, path, schema, properties, options);
 
     printSuccess('The recipe has been successfully executed!');
 }
@@ -99,7 +98,7 @@ async function cloneRecipe(recipe: string, branch: string, path: string, recipeS
 async function loadSchema(recipe: string, branch: string, path: string, recipeSources: string[], options: Options): Promise<Schema> {
     // Check if the recipe exists locally
     verbose(`Check recipe at path ${path}`, options);
-    let schema: { main: string; properties: Properties; } | undefined = undefined;
+    let schema: Schema | undefined = undefined;
 
     // Install npm dependencies
     verbose(`Install npm dependencies in ${path}`, options);
@@ -153,7 +152,7 @@ async function executeRecipe(
     schema: Schema,
     properties: FlatProperties,
     options: Options,
-    progress: Ora
+    // progress: Ora
 ) {
     verbose(`Execute recipe from ${path}/${schema.main}`, options);
     const recipe = await import(`${path}/${schema.main}`);
@@ -161,22 +160,30 @@ async function executeRecipe(
         vfs,
         properties,
         recipePath: path,
+        output: output(),
     });
 
     if (!options.dryRun && vfs.hasChanges()) {
         if (!options.yes) {
-            progress.stopAndPersist();
+            // progress.stopAndPersist();
             console.log(vfs.tree());
         }
         const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
         if (answer) {
-            progress.start();
+            // progress.start();
             await applyChanges(vfs, options.verbose);
         } else {
-            progress.fail();
+            // progress.fail();
             printWarning('The changes have not been applied!');
             process.exit(2);
         }
+    }
+
+    // post install
+    if (recipe.postInstall) {
+        await recipe.postInstall({
+            output: output(),
+        });
     }
 }
 
@@ -186,15 +193,15 @@ const applyChanges = async (vfs: VirtualFS, verboseLevels = 1): Promise<void> =>
             const fullPath = join(vfs.root, path);
 
             if ('CREATE' === change.operation) {
-                await asyncTask(outputFile(fullPath, change.content || '', {mode: change.mode}), `Creating ${path}...`);
+                await asyncTask(outputFile(fullPath, change.content || '', {mode: change.mode}), `Creating ${path}...`, 2);
             }
 
             if ('UPDATE' === change.operation) {
-                await asyncTask(outputFile(fullPath, change.content || '', {mode: change.mode}), `Updating ${path}...`);
+                await asyncTask(outputFile(fullPath, change.content || '', {mode: change.mode}), `Updating ${path}...`, 2);
             }
 
             if ('DELETE' === change.operation) {
-                await asyncTask(rm(fullPath, {recursive: true, force: true}), `Deleting ${path}...`);
+                await asyncTask(rm(fullPath, {recursive: true, force: true}), `Deleting ${path}...`, 2);
             }
 
             vfs.changeApplied(path);

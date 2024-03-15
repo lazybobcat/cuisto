@@ -10,10 +10,10 @@ export const printSuccess = (message: string) => console.log(success(message));
 export const printWarning = (message: string) => console.log(warning(message));
 export const printError = (message: string) => console.log(error(message));
 
-export const asyncTask = async <T>(task: Promise<T> | ((spinner: Ora) => Promise<T>), message: string) => {
+export const asyncTask = async <T>(task: Promise<T> | ((spinner: Ora) => Promise<T>), message: string, level = 1) => {
     return oraPromise(task, {
         text: message,
-        indent: 2,
+        indent: 2 * level,
         discardStdin: false,
     });
 };
@@ -22,4 +22,23 @@ const format = (message: string, color: 'cyan' | 'green' | 'red' | 'yellow', pre
     const p = prefix ? `${chalk[color](' ↪')} ${chalk.reset.inverse.bold[color](' CUISTO ')}  ` : '';
 
     return `${p}${chalk[color](message)}`;
+};
+
+export const output = () => {
+    return {
+        static: (message: string) => {
+            console.log(`    ↪ ${message}`);
+        },
+        animated: async (message: string, task: () => Promise<unknown>) => {
+            await oraPromise(task, {
+                text: message,
+                indent: 4,
+                discardStdin: false,
+            });
+        },
+        errorAndExit: (message: string) => {
+            console.error(error(message, false));
+            process.exit(1);
+        }
+    };
 };

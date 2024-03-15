@@ -8,9 +8,10 @@ import {Command} from '@lazybobcat/cuisto-api';
  * @param {Object} properties The properties object contains the user input corresponding to the schema.json
  * "properties" field.
  * @param {String} recipePath The path to the recipe directory. Useful to generate files with the FileGenerator.
+ * @param {Object} output The output object contains utility functions to print static or animated messages.
  */
-export default async function({ vfs, properties, recipePath }) {
-    Command.run('echo "Hello, <%= recipeName %>!');
+export default async function({ vfs, properties, recipePath, output }) {
+    Command.run('echo', ['Hello, <%= recipeName %>!']);
 
     // You can use the vfs to create files
     // vfs.write('path/to/file', 'file content');
@@ -52,8 +53,10 @@ export default async function({ vfs, properties, recipePath }) {
     //   '/dist',
     // ]);
 
-    // You can also use the Helper class to display messages and errors
-    // Helper.errorAndExit('An error occurred');
+    // You can use the output object to print messages
+    // output.static('This is a static message');
+    // await output.animated('This is an animated message... loading...', asyncFunctionReturningAPromise);
+    // output.errorAndExit('This is an error message, exiting...');
 
     // Feel free to implement your own logic here
 }
