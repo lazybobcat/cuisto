@@ -1,72 +1,72 @@
 {
-  "name": "cuisto-cli",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/cuisto-cli/src",
-  "projectType": "application",
-  "targets": {
-    "build": {
-      "executor": "@nx/esbuild:esbuild",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "defaultConfiguration": "development",
-      "options": {
-        "main": "packages/cuisto-cli/src/cli.ts",
-        "outputPath": "dist/packages/cuisto-cli",
-        "outputFileName": "cli.js",
-        "tsConfig": "packages/cuisto-cli/tsconfig.lib.json",
-        "assets": [
-          "packages/cuisto-cli/*.md",
-          "packages/cuisto-cli/recipes/**/*"
-        ],
-        "generatePackageJson": true,
-        "format": [
-          "esm"
-        ],
-        "platform": "node"
-      },
-      "configurations": {
-        "production": {
-          "minify": true,
-          "sourcemap": false
+    "name": "cuisto-cli",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/cuisto-cli/src",
+    "projectType": "library",
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "defaultConfiguration": "development",
+            "options": {
+                "main": "packages/cuisto-cli/src/cli.ts",
+                "outputPath": "dist/packages/cuisto-cli",
+                "outputFileName": "cli.js",
+                "tsConfig": "packages/cuisto-cli/tsconfig.lib.json",
+                "assets": [
+                    "packages/cuisto-cli/*.md",
+                    "packages/cuisto-cli/recipes/**/*"
+                ],
+                "generatePackageJson": true,
+                "format": [
+                    "esm"
+                ],
+                "platform": "node"
+            },
+            "configurations": {
+                "production": {
+                    "minify": true,
+                    "sourcemap": false
+                },
+                "development": {
+                    "minify": false,
+                    "sourcemap": true
+                }
+            }
         },
-        "development": {
-          "minify": false,
-          "sourcemap": true
+        "install": {
+            "executor": "nx:run-commands",
+            "options": {
+                "cwd": "dist/packages/cuisto-cli",
+                "commands": [
+                    "sed -i -E \"s/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"(.+)\\\"/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"..\\\/cuisto-api\\\"/\" package.json",
+                    "HUSKY=0 npm install -g --install-links"
+                ]
+            },
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "publish": {
+            "command": "node tools/scripts/publish.mjs cuisto-cli {args.ver} {args.tag}",
+            "dependsOn": [
+                "build"
+            ]
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": [
+                "{options.outputFile}"
+            ],
+            "options": {
+                "lintFilePatterns": [
+                    "packages/cuisto-cli/src/**/*.ts",
+                    "packages/cuisto-cli/package.json"
+                ]
+            }
         }
-      }
     },
-    "install": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "dist/packages/cuisto-cli",
-        "commands": [
-            "sed -i -E \"s/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"(.+)\\\"/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"..\\\/cuisto-api\\\"/\" package.json",
-            "HUSKY=0 npm install -g --install-links"
-        ]
-      },
-      "dependsOn": [
-        "build"
-      ]
-    },
-    "publish": {
-      "command": "node tools/scripts/publish.mjs cuisto-cli {args.ver} {args.tag}",
-      "dependsOn": [
-        "build"
-      ]
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "packages/cuisto-cli/src/**/*.ts",
-          "packages/cuisto-cli/package.json"
-        ]
-      }
-    }
-  },
-  "tags": []
+    "tags": []
 }

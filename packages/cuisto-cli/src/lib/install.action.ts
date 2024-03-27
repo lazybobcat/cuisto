@@ -14,7 +14,6 @@ import {asyncTask, info, output, printError, printSuccess, printWarning} from '.
 import {doesRecipeContainDangerousCode} from './recipe-analyser';
 import {findRepositoryUrl} from './git-operations';
 
-// TODO: fetch recipes on github/gitlab
 const dataDir = xdgData || join(homedir(), '.local', 'share');
 const recipesPath = join(dataDir, 'cuisto', 'recipes');
 
@@ -139,9 +138,11 @@ async function checkDangerousCode(path: string, options: Options, spinner: Ora):
         spinner.warn();
         printWarning('The recipe contains dangerous code.');
         // the user should be warned and asked if they want to continue
-        const answer = await confirm({message: 'Do you want to continue anyway?', default: false});
-        if (!answer) {
-            process.exit(1);
+        if (!options.yes) {
+            const answer = await confirm({message: 'Do you want to continue anyway?', default: false});
+            if (!answer) {
+                process.exit(1);
+            }
         }
     }
 }

@@ -61,7 +61,10 @@
                                     "type": "string"
                                 },
                                 "default": {
-                                    "type": "array"
+                                    "anyOf": [
+                                        { "type": "array" },
+                                        { "type": "string" }
+                                    ]
                                 },
                                 "multiple": {
                                     "type": "boolean"

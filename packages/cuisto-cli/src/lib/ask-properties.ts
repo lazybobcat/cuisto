@@ -92,7 +92,12 @@ export const askProperties = async (
                     answers[property] = result;
                 } else {
                     result = await select({message: definition.description, choices: definition.choices, default: definition.default});
-                    answers[property] = result;
+                    // If result is array
+                    if (Array.isArray(result)) {
+                        answers[property] = result.length > 0 ? result[0] : '';
+                    } else {
+                        answers[property] = result;
+                    }
                 }
                 break;
         }

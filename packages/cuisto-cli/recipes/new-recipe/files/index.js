@@ -3,12 +3,13 @@ import {Command} from '@lazybobcat/cuisto-api';
 /**
  * The default function will be executed by cuisto. You can use this function to run commands, create or manupulate
  * files in the Virtual File System (VFS). You can also use the properties object to access the user input.
- * @param {VirtualFS} vfs The Virtual File System, changes to files on the VFS will only be applied to the real file
+ * @param {Object} params The parameters object.
+ * @param {import('@lazybobcat/cuisto-api').VirtualFS} params.vfs The Virtual File System, changes to files on the VFS will only be applied to the real file
  * system after the function has finished executing, upon user confirmation.
- * @param {Object} properties The properties object contains the user input corresponding to the schema.json
+ * @param {Object} params.properties The properties object contains the user input corresponding to the schema.json
  * "properties" field.
- * @param {String} recipePath The path to the recipe directory. Useful to generate files with the FileGenerator.
- * @param {Object} output The output object contains utility functions to print static or animated messages.
+ * @param {String} params.recipePath The path to the recipe directory. Useful to generate files with the FileGenerator.
+ * @returns {Promise<void>}
  */
 export default async function({ vfs, properties, recipePath, output }) {
     Command.run('echo', ['Hello, <%= recipeName %>!']);
