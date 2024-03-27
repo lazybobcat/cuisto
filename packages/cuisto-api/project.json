@@ -22,10 +22,21 @@
                 "platform": "node"
             }
         },
+        "declarations": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["build"],
+            "options": {
+                "cwd": "packages/cuisto-api/src",
+                "commands": [
+                    "tsc -p ../tsconfig.lib.json --declaration --declarationMap --emitDeclarationOnly"
+                ]
+            }
+        },
         "publish": {
             "command": "node tools/scripts/publish.mjs cuisto-api {args.ver} {args.tag}",
             "dependsOn": [
-                "build"
+                "build",
+                "declarations"
             ]
         },
         "install": {
@@ -37,7 +48,8 @@
                 ]
             },
             "dependsOn": [
-                "build"
+                "build",
+                "declarations"
             ]
         },
         "lint": {

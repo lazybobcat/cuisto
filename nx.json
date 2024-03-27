@@ -8,7 +8,7 @@
     "extends": "nx/presets/npm.json",
     "targetDefaults": {
         "@nx/esbuild:esbuild": {
-            "cache": true,
+            "cache": false,
             "dependsOn": ["^build"],
             "inputs": ["default", "^default"]
         },

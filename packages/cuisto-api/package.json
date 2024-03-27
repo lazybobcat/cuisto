@@ -1,6 +1,6 @@
 {
     "name": "@lazybobcat/cuisto-api",
-    "version": "0.0.1",
+    "version": "0.0.4",
     "dependencies": {
         "chalk": "^5.3.0",
         "memfs": "^4.7.7",

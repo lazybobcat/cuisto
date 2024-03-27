@@ -1,6 +1,6 @@
 import {join} from 'path';
 
-import {ComposeServices, DockerComposeConfiguration} from './compose-types';
+import {ComposeServices, ComposeVolumes, DockerComposeConfiguration} from './compose-types';
 import {doMerge, doParse, doStringify} from './compose-functions';
 import {VirtualFS} from '../virtual-fs';
 
@@ -25,22 +25,40 @@ export class DockerCompose {
 
         fileName = fileName || `${this.domain}.compose.yaml`;
         const baseConfig = this.readConfiguration();
-        const serviceFilePath = join(this.composeDirectory, fileName);
+        const filePath = join(this.composeDirectory, fileName);
         // push include path only if not already present
-        if (!baseConfig.include || !baseConfig.include.includes(serviceFilePath)) {
+        if (!baseConfig.include || !baseConfig.include.includes(filePath)) {
             baseConfig.include = baseConfig.include || [];
-            baseConfig.include.push(serviceFilePath);
+            baseConfig.include.push(filePath);
         }
 
         // merge the services
-        const serviceFileContent = doParse(this.vfs.read(serviceFilePath, 'utf-8') || '');
-        this.vfs.write(serviceFilePath, doStringify(doMerge(serviceFileContent, {services: services})));
-        this.vfs.write(this.filePath, doStringify(baseConfig));
+        const fileContent = doParse(this.vfs.read(filePath, 'utf-8') || '');
+        this.vfs.write(filePath, doStringify(doMerge(fileContent, {services: services})));
+    };
+
+    addVolumes = (volumes: ComposeVolumes, fileName: string | null = null): void => {
+        // TODO : add unit tests for this method
+        if (0 === Object.keys(volumes).length) {
+            return;
+        }
+
+        fileName = fileName || `${this.domain}.compose.yaml`;
+        const baseConfig = this.readConfiguration();
+        const filePath = join(this.composeDirectory, fileName);
+        // push include path only if not already present
+        if (!baseConfig.include || !baseConfig.include.includes(filePath)) {
+            baseConfig.include = baseConfig.include || [];
+            baseConfig.include.push(filePath);
+        }
+
+        // merge the services
+        const fileContent = doParse(this.vfs.read(filePath, 'utf-8') || '');
+        this.vfs.write(filePath, doStringify(doMerge(fileContent, {volumes: volumes})));
     };
 
     // TODO: add more methods to manipulate the docker-compose.yaml file
     // - addNetwork
-    // - addVolume
     // - removeXXX?
 }
 

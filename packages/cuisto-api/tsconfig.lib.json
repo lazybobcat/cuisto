@@ -1,8 +1,10 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "../../dist/out-tsc",
+        "rootDir": "src",
+        "outDir": "../../dist/packages/cuisto-api",
         "declaration": true,
+        "noEmit": false,
         "types": [
             "node"
         ]
