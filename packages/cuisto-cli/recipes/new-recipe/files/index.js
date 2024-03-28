@@ -37,15 +37,14 @@ export default async function({ vfs, properties, recipePath, output }) {
     // });
 
     // You can create and include services to the docker-compose file
-    // const compose = new DockerCompose(vfs);
+    // const compose = new DockerCompose(vfs, 'docker-compose-file-name.yaml');
     // compose.addServices({
     //    'service-name': {
     //      image: 'image-name',
     //    }
-    // }, 'docker-compose-file-name.yaml');
+    // });
     // The first argument is an object containing the services to add, and the second argument is the name of the
-    // docker-compose file. By default, compose files are added to the .compose directory and included in the
-    // docker-compose.yaml file.
+    // docker-compose file.
 
     // You can ignore patterns in the .gitignore file
     // const gi = new Gitignore(vfs);

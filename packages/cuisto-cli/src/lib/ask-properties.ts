@@ -74,6 +74,7 @@ export const askProperties = async (
 
         // Pause the spinner while prompt is active
         spinner.stopAndPersist();
+        console.log('\n'); // Add a line break to separate the prompt from the previous output
         switch (definition.type) {
             case 'string':
             case 'number':
