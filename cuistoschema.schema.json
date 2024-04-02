@@ -62,8 +62,7 @@
                                 },
                                 "default": {
                                     "anyOf": [
-                                        { "type": "array" },
-                                        { "type": "string" }
+                                        { "type": "array" }
                                     ]
                                 },
                                 "multiple": {

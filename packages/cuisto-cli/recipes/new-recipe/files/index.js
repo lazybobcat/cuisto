@@ -1,4 +1,4 @@
-import {Command} from '@lazybobcat/cuisto-api';
+import { Command } from '@lazybobcat/cuisto-api';
 
 /**
  * The default function will be executed by cuisto. You can use this function to run commands, create or manupulate

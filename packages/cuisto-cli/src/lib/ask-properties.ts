@@ -1,6 +1,5 @@
-import {checkbox, confirm, input, select} from '@inquirer/prompts';
+import {input, verbose} from '@lazybobcat/cuisto-api';
 import {Ora} from 'ora';
-import {verbose} from '@lazybobcat/cuisto-api';
 
 type Property =
     | {
@@ -37,8 +36,6 @@ export type Properties = {
 };
 
 export type FlatProperties = { [property: string]: string | number | boolean | string[]; };
-
-const notEmpty = (value: string) => value.trim().length > 0;
 
 export const askProperties = async (
     properties: Properties,
@@ -78,27 +75,22 @@ export const askProperties = async (
         switch (definition.type) {
             case 'string':
             case 'number':
-                result = await input({message: definition.description, default: definition.default, validate: definition.required ? notEmpty : undefined});
+                result = await input().string(definition.description, definition.default, definition.required);
                 answers[property] = result;
                 break;
 
             case 'boolean':
-                result = await confirm({message: definition.description, default: definition.default});
+                result = await input().boolean(definition.description, definition.default);
                 answers[property] = result;
                 break;
 
             case 'choice':
                 if (definition.multiple) {
-                    result = await checkbox({message: definition.description, choices: definition.choices});
+                    result = await input().choice(definition.description, definition.choices, true, definition.required);
                     answers[property] = result;
                 } else {
-                    result = await select({message: definition.description, choices: definition.choices, default: definition.default});
-                    // If result is array
-                    if (Array.isArray(result)) {
-                        answers[property] = result.length > 0 ? result[0] : '';
-                    } else {
-                        answers[property] = result;
-                    }
+                    result = await input().choice(definition.description, definition.choices, false, definition.required);
+                    answers[property] = result;
                 }
                 break;
         }

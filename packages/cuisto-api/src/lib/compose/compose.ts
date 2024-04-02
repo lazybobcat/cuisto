@@ -3,7 +3,6 @@ import {doMerge, doParse, doStringify} from './compose-functions';
 import {VirtualFS} from '../virtual-fs';
 
 export class DockerCompose {
-
     // eslint-disable-next-line no-empty-function
     constructor(private readonly vfs: VirtualFS, private readonly filePath: string, private readonly includeInComposeFile: string | null = null) {}
 

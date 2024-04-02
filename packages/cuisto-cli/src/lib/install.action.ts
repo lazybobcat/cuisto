@@ -1,4 +1,4 @@
-import {VirtualFS, asyncTask, info, outputFile, printError, printSuccess, printWarning, verbose} from '@lazybobcat/cuisto-api';
+import {VirtualFS, info, output, outputFile, printError, printSuccess, printWarning, verbose} from '@lazybobcat/cuisto-api';
 import {dirname, join} from 'node:path';
 import fs, {mkdirSync, rmSync} from 'node:fs';
 import {CosmiconfigResult} from 'cosmiconfig';
@@ -20,7 +20,7 @@ type Schema = { name: string; main: string; properties: Properties; };
 type Options = { property: { [name: string]: string; }; yes: boolean; verbose: number; dryRun: boolean; };
 type RecipeModule = {
     preInstall?: (args: { schema: Schema; properties: FlatProperties; vfs: VirtualFS }) => Promise<void>;
-    postInstall?: () => Promise<void>;
+    postInstall?: (args: { pauseSpinner: (() => void) }) => Promise<void>;
     default: (args: { vfs: VirtualFS; properties: FlatProperties; recipePath: string }) => Promise<void>;
 };
 
@@ -48,19 +48,22 @@ export async function installAction(
     if ((recipe.startsWith('.') || recipe.startsWith('/')) && fs.existsSync(recipe)) {
         path = recipe;
     } else {
-        await asyncTask(
+        await output().animated(
+            info(`📖 Looking for the recipe "${recipe}"...`, false),
             cloneRecipe(recipe, branch, path, recipeSources, options),
-            info(`📖 Looking for the recipe "${recipe}"...`, false)
+            1
         );
     }
-    const schema = await asyncTask(
+    const schema = await output().animated(
+        info(`🌱 Loading the recipe "${recipe}"...`, false),
         loadSchema(recipe, path, options),
-        info(`🌱 Loading the recipe "${recipe}"...`, false)
+        1
     );
     process.env['RECIPE_NAME'] = schema.name;
-    await asyncTask(
+    await output().animated(
+        info('🍪 Checking the diet...', false),
         spinner => checkDangerousCode(path, options, spinner),
-        info('🍪 Checking the diet...', false)
+        1
     );
 
     // Recipe execution:
@@ -72,27 +75,31 @@ export async function installAction(
     const recipeModule = await import(`${path}/${schema.main}`) as RecipeModule;
 
     // Pre install
-    await asyncTask(
+    await output().animated(
+        info('🔪 Sharpening the knives...', false),
         execorePreInstall(recipeModule, vfs, schema, properties),
-        info('🔪 Preparing the kitchen...', false)
+        1
     );
 
     // Ask properties
-    properties = await asyncTask(
+    properties = await output().animated(
+        info('🍄 Gathering ingredients...', false),
         spinner => askProperties((schema as Schema).properties, properties, options, spinner),
-        info('🍄 Gathering ingredients...', false)
+        1
     );
 
     // Execute the recipe
-    await asyncTask(
+    await output().animated(
+        info(`🍳 Cooking "${recipe}"...`, false),
         spinner => executeRecipe(recipeModule, vfs, path, schema, properties, options, spinner),
-        info(`🍳 Cooking "${recipe}"...`, false)
+        1
     );
 
     // Post install
-    await asyncTask(
-        executePostInstall(recipeModule),
-        info('🚿 Cleaning the kitchen...', false)
+    await output().animated(
+        info('🚿 Cleaning the kitchen...', false),
+        spinner => executePostInstall(recipeModule, spinner),
+        1
     );
 
     printSuccess('The recipe has been successfully executed!');
@@ -220,9 +227,11 @@ async function executeRecipe(
     }
 }
 
-async function executePostInstall(recipe: RecipeModule) {
+async function executePostInstall(recipe: RecipeModule, spinner: Ora) {
     if (recipe.postInstall) {
-        await recipe.postInstall();
+        await recipe.postInstall({
+            pauseSpinner: () => spinner.stopAndPersist(),
+        });
     }
 }
 
@@ -232,15 +241,27 @@ const applyChanges = async (vfs: VirtualFS, verboseLevels = 1): Promise<void> =>
             const fullPath = join(vfs.root, path);
 
             if ('CREATE' === change.operation) {
-                await asyncTask(outputFile(fullPath, change.content || '', {mode: change.mode}), `Creating ${path}...`, 2);
+                await output().animated(
+                    `Creating ${path}...`,
+                    outputFile(fullPath, change.content || '', {mode: change.mode}),
+                    2
+                );
             }
 
             if ('UPDATE' === change.operation) {
-                await asyncTask(outputFile(fullPath, change.content || '', {mode: change.mode}), `Updating ${path}...`, 2);
+                await output().animated(
+                    `Updating ${path}...`,
+                    outputFile(fullPath, change.content || '', {mode: change.mode}),
+                    2
+                );
             }
 
             if ('DELETE' === change.operation) {
-                await asyncTask(rm(fullPath, {recursive: true, force: true}), `Deleting ${path}...`, 2);
+                await output().animated(
+                    `Deleting ${path}...`,
+                    rm(fullPath, {recursive: true, force: true}),
+                    2
+                );
             }
 
             vfs.changeApplied(path);
