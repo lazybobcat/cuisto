@@ -85,7 +85,7 @@ export async function installAction(
 
     // Execute the recipe
     await asyncTask(
-        executeRecipe(recipeModule, vfs, path, schema, properties, options),
+        spinner => executeRecipe(recipeModule, vfs, path, schema, properties, options, spinner),
         info(`🍳 Cooking "${recipe}"...`, false)
     );
 
@@ -192,7 +192,7 @@ async function executeRecipe(
     schema: Schema,
     properties: FlatProperties,
     options: Options,
-    // progress: Ora
+    progress: Ora
 ) {
     verbose(`Execute recipe from ${path}/${schema.main}`, options);
 
@@ -204,7 +204,8 @@ async function executeRecipe(
 
     if (!options.dryRun && vfs.hasChanges()) {
         if (!options.yes) {
-            // progress.stopAndPersist();
+            progress.stopAndPersist();
+            console.log('\nThe following changes will be applied:');
             console.log(vfs.tree());
         }
         const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});

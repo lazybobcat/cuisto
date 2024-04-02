@@ -90,18 +90,15 @@ program.parse(process.argv);
  * about the environment and the error that occurred.
  */
 process.setUncaughtExceptionCaptureCallback(async error => {
-    const verbosity = Number(process.env['VERBOSE']) || 0;
     const recipe = process.env['RECIPE_NAME'] || 'unknown';
     const dependencies: {[dep: string]: string} = JSON.parse(process.env['RECIPE_DEPENDENCIES'] || '') || {};
     const npm = await execa('npm', ['--version']);
-    if (verbosity > 0) {
-        verbose(error instanceof Error ? error.message : String(error), {verbose: verbosity});
-        printError(`An error occurred while executing the recipe "${recipe}".`);
-    } else {
 
-        printError(`An error occurred while executing the recipe "${recipe}". Please run the command with the --verbose option to get more information.`);
-    }
+    const message = error instanceof Error ? error.message : String(error);
+    printError(`An error occurred while executing the recipe "${recipe}".`);
+    console.error(`\n[ERROR] ${message}`);
 
+    console.log('\n'); // Add a line break to separate the error message from the previous output
     printInfo('If you consider opening an issue, please provide the following information:');
     console.log(`
 Cuisto:\t${metadata.default.version}
