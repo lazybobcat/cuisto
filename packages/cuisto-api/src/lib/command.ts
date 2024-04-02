@@ -1,4 +1,4 @@
-import {execa} from 'execa';
+import {ExecaChildProcess, execa} from 'execa';
 
 import {verbose} from './verbose';
 
@@ -14,6 +14,15 @@ export class Command {
         const verbosity = Number(process.env['VERBOSE']) || 0;
 
         return this.doRun(command, args, dryRun, verbosity);
+    }
+
+    /**
+     * Starts a child process with the given command to execute.
+     * @param command The command to execute.
+     * @param args The arguments to pass to the command.
+     */
+    static childProcess(command: string, args: string[] = []): ExecaChildProcess {
+        return execa(command, args, {stdio: 'inherit'});
     }
 
     private static async doRun(command: string, args: string[], dryRun: boolean, verbosity: number): Promise<string> {
