@@ -11,7 +11,7 @@ import {Command} from '@lazybobcat/cuisto-api';
  * @param {String} params.recipePath The path to the recipe directory. Useful to generate files with the FileGenerator.
  * @returns {Promise<void>}
  */
-export default async function({ vfs, properties, recipePath, output }) {
+export default async function({ vfs, properties, recipePath }) {
     Command.run('echo', ['Hello, <%= recipeName %>!']);
 
     // You can use the vfs to create files
@@ -54,9 +54,19 @@ export default async function({ vfs, properties, recipePath, output }) {
     // ]);
 
     // You can use the output object to print messages
-    // output.static('This is a static message');
-    // await output.animated('This is an animated message... loading...', asyncFunctionReturningAPromise);
-    // output.errorAndExit('This is an error message, exiting...');
+    // output().static('This is a static message');
+    // await output().animated('This is an animated message... loading...', asyncFunctionReturningAPromise);
+    // output().errorAndExit('This is an error message, exiting...');
 
     // Feel free to implement your own logic here
 }
+
+// export async function preInstall({ schema, properties, vfs }) {
+//     // You can use the preInstall hook to update the properties and schema before the user is prompted for input
+// }
+
+// export async function postInstall() {
+//     // You can use the postInstall hook to run commands after the recipe has been installed, like commiting the
+//     // resulting files to a git repository
+// }
+

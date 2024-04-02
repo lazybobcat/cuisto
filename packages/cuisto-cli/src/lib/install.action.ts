@@ -1,4 +1,4 @@
-import {VirtualFS, outputFile, verbose} from '@lazybobcat/cuisto-api';
+import {VirtualFS, asyncTask, info, outputFile, printError, printSuccess, printWarning, verbose} from '@lazybobcat/cuisto-api';
 import {dirname, join} from 'node:path';
 import fs, {mkdirSync, rmSync} from 'node:fs';
 import {CosmiconfigResult} from 'cosmiconfig';
@@ -10,7 +10,6 @@ import {rm} from 'node:fs/promises';
 import {xdgData} from 'xdg-basedir';
 
 import {FlatProperties, Properties, askProperties} from './ask-properties';
-import {asyncTask, info, output, printError, printSuccess, printWarning} from './output';
 import {doesRecipeContainDangerousCode} from './recipe-analyser';
 import {findRepositoryUrl} from './git-operations';
 
@@ -19,6 +18,11 @@ const recipesPath = join(dataDir, 'cuisto', 'recipes');
 
 type Schema = { name: string; main: string; properties: Properties; };
 type Options = { property: { [name: string]: string; }; yes: boolean; verbose: number; dryRun: boolean; };
+type RecipeModule = {
+    preInstall?: (args: { schema: Schema; properties: FlatProperties; vfs: VirtualFS }) => Promise<void>;
+    postInstall?: () => Promise<void>;
+    default: (args: { vfs: VirtualFS; properties: FlatProperties; recipePath: string }) => Promise<void>;
+};
 
 export async function installAction(
     recipe: string,
@@ -50,7 +54,7 @@ export async function installAction(
         );
     }
     const schema = await asyncTask(
-        loadSchema(recipe, branch, path, recipeSources, options),
+        loadSchema(recipe, path, options),
         info(`🌱 Loading the recipe "${recipe}"...`, false)
     );
     process.env['RECIPE_NAME'] = schema.name;
@@ -58,14 +62,38 @@ export async function installAction(
         spinner => checkDangerousCode(path, options, spinner),
         info('🍪 Checking the diet...', false)
     );
-    const properties = await asyncTask(
-        spinner => askProperties((schema as Schema).properties, options.property, options, spinner),
+
+    // Recipe execution:
+    // - preInstall
+    // - askProperties
+    // - executeRecipe
+    // - postInstall
+    let properties: FlatProperties = options.property;
+    const recipeModule = await import(`${path}/${schema.main}`) as RecipeModule;
+
+    // Pre install
+    await asyncTask(
+        execorePreInstall(recipeModule, vfs, schema, properties),
+        info('🔪 Preparing the kitchen...', false)
+    );
+
+    // Ask properties
+    properties = await asyncTask(
+        spinner => askProperties((schema as Schema).properties, properties, options, spinner),
         info('🍄 Gathering ingredients...', false)
     );
 
     // Execute the recipe
-    console.log(info(`  🍳 Cooking "${recipe}"...`, false));
-    await executeRecipe(vfs, path, schema, properties, options);
+    await asyncTask(
+        executeRecipe(recipeModule, vfs, path, schema, properties, options),
+        info(`🍳 Cooking "${recipe}"...`, false)
+    );
+
+    // Post install
+    await asyncTask(
+        executePostInstall(recipeModule),
+        info('🚿 Cleaning the kitchen...', false)
+    );
 
     printSuccess('The recipe has been successfully executed!');
 }
@@ -94,7 +122,7 @@ async function cloneRecipe(recipe: string, branch: string, path: string, recipeS
     }
 }
 
-async function loadSchema(recipe: string, branch: string, path: string, recipeSources: string[], options: Options): Promise<Schema> {
+async function loadSchema(recipe: string, path: string, options: Options): Promise<Schema> {
     // Check if the recipe exists locally
     verbose(`Check recipe at path ${path}`, options);
     let schema: Schema | undefined = undefined;
@@ -147,7 +175,18 @@ async function checkDangerousCode(path: string, options: Options, spinner: Ora):
     }
 }
 
+async function execorePreInstall(recipe: RecipeModule, vfs: VirtualFS, schema: Schema, properties: FlatProperties) {
+    if (recipe.preInstall) {
+        await recipe.preInstall({
+            schema,
+            properties,
+            vfs,
+        });
+    }
+}
+
 async function executeRecipe(
+    recipe: RecipeModule,
     vfs: VirtualFS,
     path: string,
     schema: Schema,
@@ -156,12 +195,11 @@ async function executeRecipe(
     // progress: Ora
 ) {
     verbose(`Execute recipe from ${path}/${schema.main}`, options);
-    const recipe = await import(`${path}/${schema.main}`);
+
     await recipe.default({
         vfs,
         properties,
         recipePath: path,
-        output: output(),
     });
 
     if (!options.dryRun && vfs.hasChanges()) {
@@ -179,12 +217,11 @@ async function executeRecipe(
             process.exit(2);
         }
     }
+}
 
-    // post install
+async function executePostInstall(recipe: RecipeModule) {
     if (recipe.postInstall) {
-        await recipe.postInstall({
-            output: output(),
-        });
+        await recipe.postInstall();
     }
 }
 
