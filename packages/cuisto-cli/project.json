@@ -6,6 +6,9 @@
     "targets": {
         "build": {
             "executor": "@nx/esbuild:esbuild",
+            "dependsOn": [
+                "cuisine-api:build"
+            ],
             "outputs": [
                 "{options.outputPath}"
             ],
@@ -19,7 +22,6 @@
                     "packages/cuisto-cli/*.md",
                     "packages/cuisto-cli/recipes/**/*"
                 ],
-                "generatePackageJson": true,
                 "format": [
                     "esm"
                 ],
@@ -46,7 +48,8 @@
                 ]
             },
             "dependsOn": [
-                "build"
+                "build",
+                "cuisine-api:install"
             ]
         },
         "publish": {

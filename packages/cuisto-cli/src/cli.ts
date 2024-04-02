@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
+import {printError, printInfo, verbose} from '@lazybobcat/cuisto-api';
 import {Command} from 'commander';
 import {cosmiconfig} from 'cosmiconfig';
 import {dirname} from 'node:path';
 import {execa} from 'execa';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs';
-import {verbose} from '@lazybobcat/cuisto-api';
 
-import {printError, printInfo} from './lib/output';
 import {installAction} from './lib/install.action';
 
 function increaseVerbosity(_: string, previous: number): number {

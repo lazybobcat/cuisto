@@ -42,7 +42,7 @@ const notEmpty = (value: string) => value.trim().length > 0;
 
 export const askProperties = async (
     properties: Properties,
-    providedValues: {[name: string]: string | undefined},
+    providedValues: FlatProperties,
     options: {yes: boolean, verbose: number},
     spinner: Ora
 ): Promise<FlatProperties> => {
