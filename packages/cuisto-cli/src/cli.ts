@@ -94,7 +94,7 @@ process.setUncaughtExceptionCaptureCallback(async error => {
     const dependencies: {[dep: string]: string} = JSON.parse(process.env['RECIPE_DEPENDENCIES'] || '') || {};
     const npm = await execa('npm', ['--version']);
 
-    const message = error instanceof Error ? error.message : String(error);
+    const message = error instanceof Error ? (error?.stack ?? error.message) : String(error);
     printError(`An error occurred while executing the recipe "${recipe}".`);
     console.error(`\n[ERROR] ${message}`);
 
