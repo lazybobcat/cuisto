@@ -36,9 +36,10 @@ export const output = () => {
                 discardStdin: false,
             });
         },
-        errorAndExit: (message: string) => {
+        errorAndExit: (message: string): never => {
             console.error(error(message, false));
             process.exit(1);
         }
     };
 };
+
