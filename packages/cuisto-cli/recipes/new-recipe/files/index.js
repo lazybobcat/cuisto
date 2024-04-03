@@ -6,7 +6,7 @@ import { Command } from '@lazybobcat/cuisto-api';
  * @param {Object} params The parameters object.
  * @param {import('@lazybobcat/cuisto-api').VirtualFS} params.vfs The Virtual File System, changes to files on the VFS will only be applied to the real file
  * system after the function has finished executing, upon user confirmation.
- * @param {Object} params.properties The properties object contains the user input corresponding to the schema.json
+ * @param {Map<string, any>} params.properties The properties object contains the user input corresponding to the schema.json
  * "properties" field.
  * @param {String} params.recipePath The path to the recipe directory. Useful to generate files with the FileGenerator.
  * @returns {Promise<void>}
