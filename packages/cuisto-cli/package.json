@@ -1,6 +1,6 @@
 {
   "name": "@lazybobcat/cuisto-cli",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "dependencies": {
     "execa": "^8.0.1",
     "ora": "^8.0.1",
