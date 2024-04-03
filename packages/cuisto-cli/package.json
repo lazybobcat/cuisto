@@ -2,13 +2,12 @@
   "name": "@lazybobcat/cuisto-cli",
   "version": "0.0.8",
   "dependencies": {
-    "@inquirer/prompts": "^4.1.0",
-    "commander": "^12.0.0",
     "execa": "^8.0.1",
     "ora": "^8.0.1",
     "@lazybobcat/cuisto-api": "0.0.6",
     "cosmiconfig": "^9.0.0",
-    "xdg-basedir": "^5.1.0"
+    "xdg-basedir": "^5.1.0",
+    "commander": "^12.0.0"
   },
   "type": "module",
   "main": "./cli.js",

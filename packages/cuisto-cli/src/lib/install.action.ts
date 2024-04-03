@@ -1,9 +1,8 @@
-import {VirtualFS, info, output, outputFile, printError, printSuccess, printWarning, verbose} from '@lazybobcat/cuisto-api';
+import {VirtualFS, info, input, output, outputFile, printError, printSuccess, printWarning, verbose} from '@lazybobcat/cuisto-api';
 import {dirname, join} from 'node:path';
 import fs, {mkdirSync, rmSync} from 'node:fs';
 import {CosmiconfigResult} from 'cosmiconfig';
 import {Ora} from 'ora';
-import {confirm} from '@inquirer/prompts';
 import {execa} from 'execa';
 import {homedir} from 'node:os';
 import {rm} from 'node:fs/promises';
@@ -174,7 +173,7 @@ async function checkDangerousCode(path: string, options: Options, spinner: Ora):
         printWarning('The recipe contains dangerous code.');
         // the user should be warned and asked if they want to continue
         if (!options.yes) {
-            const answer = await confirm({message: 'Do you want to continue anyway?', default: false});
+            const answer = await input().boolean('Do you want to continue anyway?', false);
             if (!answer) {
                 process.exit(1);
             }
@@ -215,7 +214,7 @@ async function executeRecipe(
             console.log('\nThe following changes will be applied:');
             console.log(vfs.tree());
         }
-        const answer = options.yes || await confirm({message: 'Do you want to write these files in your project?', default: false});
+        const answer = options.yes || await input().boolean('Do you want to write these files in your project?', false);
         if (answer) {
             // progress.start();
             await applyChanges(vfs, options.verbose);

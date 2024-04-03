@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import {printError, printInfo, verbose} from '@lazybobcat/cuisto-api';
+import {printError, printInfo} from '@lazybobcat/cuisto-api';
 import {Command} from 'commander';
 import {cosmiconfig} from 'cosmiconfig';
 import {dirname} from 'node:path';

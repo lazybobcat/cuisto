@@ -44,6 +44,7 @@
                 "cwd": "dist/packages/cuisto-cli",
                 "commands": [
                     "sed -i -E \"s/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"(.+)\\\"/\\\"@lazybobcat\\\/cuisto-api\\\": \\\"..\\\/cuisto-api\\\"/\" package.json",
+                    "sleep 1",
                     "HUSKY=0 npm install -g --install-links"
                 ]
             },
