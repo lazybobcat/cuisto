@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 # Cuisto
 
-![Cuisto banner](../../resources/images/splash.jpg)
+![Cuisto banner](https://raw.githubusercontent.com/lazybobcat/cuisto/documentation/resources/images/splash.jpg)
 
 CLI tool allowing you to write and execute "recipes".
 
