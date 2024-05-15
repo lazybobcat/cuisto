@@ -1,11 +1,15 @@
 <a name="readme-top"></a>
 # Cuisto
 
+![Cuisto banner](./resources/images/splash.jpg)
+
 CLI tool allowing you to write and execute "recipes".
 
 - 🍕 **Quickly bootstrap your projects** by setting up the file structure and installing all your tools and frameworks using only one command. Abstraction for the most common configuration files such as Docker compose, dotenv, yaml, gitignore and more are available.
 - 🍪 **Execute repetitive commands and manipulate templated files** in order to fasten repetitive tasks.
 - 🍱 **Interactively let the user choose his configuration** with the power of CLI inquiries.
+
+**/!\ Please be careful when using recipes from untrusted sources, since it can execute commands, read, write and delete files.**
 
 
 ## Installation
@@ -16,7 +20,7 @@ CLI tool allowing you to write and execute "recipes".
 npm install -g @lazybobcat/cuisto-cli
 ```
 
-*`cuisto` is also available as a docker image: `docker run --rm -it -v $(pwd):/app -u $(id -u):$(id -g) lazybobcat/cuisto <command>`. See [cuisto's Docker Hub repository](https://hub.docker.com/r/lazybobcat/cuisto) for more information.*
+*`cuisto` is also available as a Docker image: `docker run --rm -it -v $(pwd):/app -u $(id -u):$(id -g) lazybobcat/cuisto <command>`. See [cuisto's Docker Hub repository](https://hub.docker.com/r/lazybobcat/cuisto) for more information.*
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -40,6 +44,13 @@ cuisto install /path/to/my/recipe
 
 You can add or override recipe sources in the configuration, for example if your recipe is not on GitHub but on Gitlab. See [Configuration](#configuration) if you find yourself in this situation.
 
+```json
+{
+    "$schema": "https://raw.githubusercontent.com/lazybobcat/cuisto/main/cuistorc.schema.json",
+    "name": "<projectName>",
+    "recipe_sources": []
+}
+```
 
 ### Initialize a cuisto configuration file
 
