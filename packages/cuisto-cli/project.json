@@ -50,7 +50,7 @@
             },
             "dependsOn": [
                 "build",
-                "cuisine-api:install"
+                "cuisto-api:install"
             ]
         },
         "publish": {
