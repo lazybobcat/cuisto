@@ -18,8 +18,8 @@ const recipesPath = join(dataDir, 'cuisto', 'recipes');
 type Schema = { name: string; main: string; properties: Properties; };
 type Options = { property: { [name: string]: string; }; yes: boolean; verbose: number; dryRun: boolean; };
 type RecipeModule = {
-    preInstall?: (args: { schema: Schema; properties: FlatProperties; vfs: VirtualFS }) => Promise<void>;
-    postInstall?: (args: { pauseSpinner: (() => void) }) => Promise<void>;
+    preInstall?: (args: { schema: Schema; properties: FlatProperties; vfs: VirtualFS; options: Options }) => Promise<void>;
+    postInstall?: (args: { pauseSpinner: (() => void); options: Options }) => Promise<void>;
     default: (args: { vfs: VirtualFS; properties: FlatProperties; recipePath: string }) => Promise<void>;
 };
 
@@ -76,7 +76,7 @@ export async function installAction(
     // Pre install
     await output().animated(
         info('🔪 Sharpening the knives...', false),
-        execorePreInstall(recipeModule, vfs, schema, properties),
+        execorePreInstall(recipeModule, vfs, schema, properties, options),
         1
     );
 
@@ -97,7 +97,7 @@ export async function installAction(
     // Post install
     await output().animated(
         info('🚿 Cleaning the kitchen...', false),
-        spinner => executePostInstall(recipeModule, spinner),
+        spinner => executePostInstall(recipeModule, options, spinner),
         1
     );
 
@@ -181,12 +181,13 @@ async function checkDangerousCode(path: string, options: Options, spinner: Ora):
     }
 }
 
-async function execorePreInstall(recipe: RecipeModule, vfs: VirtualFS, schema: Schema, properties: FlatProperties) {
+async function execorePreInstall(recipe: RecipeModule, vfs: VirtualFS, schema: Schema, properties: FlatProperties, options: Options) {
     if (recipe.preInstall) {
         await recipe.preInstall({
             schema,
             properties,
             vfs,
+            options
         });
     }
 }
@@ -226,10 +227,11 @@ async function executeRecipe(
     }
 }
 
-async function executePostInstall(recipe: RecipeModule, spinner: Ora) {
+async function executePostInstall(recipe: RecipeModule, options: Options, spinner: Ora) {
     if (recipe.postInstall) {
         await recipe.postInstall({
             pauseSpinner: () => spinner.stopAndPersist(),
+            options
         });
     }
 }
