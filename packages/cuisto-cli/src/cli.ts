@@ -110,5 +110,7 @@ npm:\t${npm.stdout}
     for (const [name, version] of Object.entries(dependencies)) {
         console.log(`${name}: ${version}`);
     }
+
+    process.exit(1);
 });
 
