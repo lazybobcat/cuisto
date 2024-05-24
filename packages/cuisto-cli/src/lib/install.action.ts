@@ -76,16 +76,17 @@ export async function installAction(
     // Pre install
     await output().animated(
         info('🔪 Sharpening the knives...', false),
-        execorePreInstall(recipeModule, vfs, schema, properties, options),
+        executePreInstall(recipeModule, vfs, schema, properties, options),
         1
     );
 
     // Ask properties
-    properties = await output().animated(
+    const ingredients = await output().animated(
         info('🍄 Gathering ingredients...', false),
         spinner => askProperties((schema as Schema).properties, properties, options, spinner),
         1
     );
+    properties = {...properties, ...ingredients};
 
     // Execute the recipe
     await output().animated(
@@ -181,7 +182,7 @@ async function checkDangerousCode(path: string, options: Options, spinner: Ora):
     }
 }
 
-async function execorePreInstall(recipe: RecipeModule, vfs: VirtualFS, schema: Schema, properties: FlatProperties, options: Options) {
+async function executePreInstall(recipe: RecipeModule, vfs: VirtualFS, schema: Schema, properties: FlatProperties, options: Options) {
     if (recipe.preInstall) {
         await recipe.preInstall({
             schema,

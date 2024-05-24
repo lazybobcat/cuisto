@@ -55,6 +55,24 @@
                             "type": "object",
                             "properties": {
                                 "type": {
+                                    "const": "boolean"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "default": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "description"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
                                     "const": "choice"
                                 },
                                 "description": {
